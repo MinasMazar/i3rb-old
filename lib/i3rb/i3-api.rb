@@ -1,0 +1,56 @@
+require 'json'
+
+module I3
+  module API
+  
+    [ :get_workspaces, :get_outputs, :get_tree, :get_marks, :get_bar_config, :get_version ].each do |meth|
+      define_method meth do
+        i3send "-t #{meth}"
+      end
+    end
+  
+    def current_workspace
+      get_workspaces.find {|w| w["focused"] == true }
+    end
+
+    def current_workspaces
+      get_outputs.select {|o| o["current_workspace"] != nil }
+    end
+
+    def get_active_outputs
+      get_outputs.select {|o| o["active"] == true }
+    end
+
+    def goto_workspace(ws = :back_and_forth)
+      ws = 'back_and_forth' if ws == :back_and_forth
+      i3cmd "workspace #{ws}"
+    end
+
+    def move_to_workspace(ws)
+      i3cmd "move container to workspace #{ws}"
+    end
+
+    def goto_output(out)
+      i3cmd "focus output #{out}"
+    end
+
+    def exec(cmd)
+      i3send "exec \"#{cmd}\""
+    end
+
+    def method_missing(m,*a,&b)
+      i3send "#{m} #{a.join(" ")}", &b
+    end
+
+    protected
+  
+    def i3send(*msg)
+      msg = msg.join(", ")
+      ret = JSON.parse `i3-msg #{msg}`
+      $logger.debug "i3-send: < #{msg} > => #{ret}" if $debug
+      return yield(ret) if block_given?
+      ret
+    end
+  
+  end
+end
