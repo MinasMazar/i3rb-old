@@ -1,0 +1,24 @@
+require 'i3rb'
+
+ARGV.map! do |arg|
+  if arg == "_stdin_"
+    $stdin.readline.chomp
+  else
+    arg
+  end
+end
+
+#$debug = true
+
+driver = Object.new.extend I3::API
+class << driver
+  def current_workspace_name
+    current_workspace["name"]
+  end
+end
+
+if ARGV.size > 1
+  puts driver.send ARGV[0], ARGV[1..-1].join(" ")
+else
+  puts driver.send ARGV[0]
+end
