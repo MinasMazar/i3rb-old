@@ -1,5 +1,6 @@
 require "i3rb/version"
 require "i3rb/api"
+require "i3rb/config"
 require "i3rb/bar"
 require "logger"
 

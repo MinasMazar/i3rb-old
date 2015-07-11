@@ -38,6 +38,12 @@ module I3
       i3send "exec \"#{cmd}\""
     end
 
+    [ :restart, :reload, :quit ].each do |meth|
+      define_method meth do
+        i3send "#{meth}"
+      end
+    end
+
     protected
   
     def i3send(*msg)
