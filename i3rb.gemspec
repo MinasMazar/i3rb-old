@@ -5,12 +5,12 @@ require 'i3rb/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "i3rb"
-  spec.version       = I3rb::VERSION
+  spec.version       = I3::VERSION
   spec.authors       = ["MinasMazar"]
   spec.email         = ["minasmazar@gmail.com"]
 
-  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
-  spec.description   = %q{TODO: Write a longer description or delete this line.}
+  spec.summary       = "I3wm ruby wrapper. It relies on i3-msg executable."
+  spec.description   = " "
   spec.homepage      = "TODO: Put your gem's website or public repo URL here."
 
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or

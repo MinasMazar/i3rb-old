@@ -1,3 +1,5 @@
+#!/bin/ruby
+
 require 'i3rb'
 
 ARGV.map! do |arg|
@@ -14,6 +16,10 @@ driver = Object.new.extend I3::API
 class << driver
   def current_workspace_name
     current_workspace["name"]
+  end
+  
+  def method_missing(m,*a,&b)
+    i3send "#{m} #{a.join(" ")}", &b
   end
 end
 

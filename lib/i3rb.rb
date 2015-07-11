@@ -6,6 +6,6 @@ require "logger"
 $logger = Logger.new STDERR
 $debug = false
 
-module I3rb
+module I3
   # Your code goes here...
 end

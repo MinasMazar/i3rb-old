@@ -7,7 +7,7 @@ class TestI3rb < Minitest::Test
   @@i3bar = I3::Bar.get_instance
 
   def test_that_it_has_a_version_number
-    refute_nil ::I3rb::VERSION
+    refute_nil ::I3::VERSION
   end
 
   def test_I3API_launch_terminal

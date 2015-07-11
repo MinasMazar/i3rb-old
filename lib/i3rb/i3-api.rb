@@ -23,23 +23,19 @@ module I3
 
     def goto_workspace(ws = :back_and_forth)
       ws = 'back_and_forth' if ws == :back_and_forth
-      i3cmd "workspace #{ws}"
+      i3send "workspace #{ws}"
     end
 
     def move_to_workspace(ws)
-      i3cmd "move container to workspace #{ws}"
+      i3send "move container to workspace #{ws}"
     end
 
     def goto_output(out)
-      i3cmd "focus output #{out}"
+      i3send "focus output #{out}"
     end
 
     def exec(cmd)
       i3send "exec \"#{cmd}\""
-    end
-
-    def method_missing(m,*a,&b)
-      i3send "#{m} #{a.join(" ")}", &b
     end
 
     protected
