@@ -21,4 +21,10 @@ class TestI3rb < Minitest::Test
     @@i3bar.to_stdout
   end
 
+  def test_shortcuts
+    nc = I3::Config.new
+    nc.add_shortcut 'mod+o', 'exec i3-sensible-terminal'
+    puts nc.to_s
+  end
+
 end

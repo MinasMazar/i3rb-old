@@ -91,7 +91,7 @@ module I3
       include Methods
     end
 
-    require 'i3rb/i3-bar-widgets/hostname'
+    require 'i3rb/bar/widgets/hostname'
 
     def self.get_instance
       Instance.new

@@ -1,6 +1,6 @@
 require "i3rb/version"
-require "i3rb/i3-api"
-require "i3rb/i3-bar"
+require "i3rb/api"
+require "i3rb/bar"
 require "logger"
 
 $logger = Logger.new STDERR
