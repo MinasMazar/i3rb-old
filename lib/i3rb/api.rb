@@ -44,9 +44,18 @@ module I3
       end
     end
 
+    def buffer
+      @buffer ||= []
+    end
+
     def i3send(msg)
-      system_i3msg msg
-      #i3ipc msg
+      self.buffer << msg
+      flush! if self.buffer.size >= 2
+    end
+
+    def flush!
+      system_i3msg buffer.join(", ")
+      @buffer = []
     end
 
     attr_reader :connection

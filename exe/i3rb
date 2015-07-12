@@ -23,8 +23,11 @@ class << driver
   end
 end
 
-if ARGV.size > 1
-  puts driver.send ARGV[0], ARGV[1..-1].join(" ")
-else
-  puts driver.send ARGV[0]
+ARGV.join(" ").split(",").each do |cmd|
+  cmd, args = cmd.split[0], cmd.split[1..-1]
+  if args.any?
+    puts driver.send cmd, *args
+  else
+    puts driver.send cmd
+  end
 end
