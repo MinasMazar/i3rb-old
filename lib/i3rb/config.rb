@@ -18,13 +18,17 @@ module I3
 
     def self.from_file(pathname)
       f = File.readlines pathname
+      cur_mode = :default
       c = new
       f.each do |l|
-        if md = l .match(/floating_modifier (.+?)/)
+        if md = l.match(/floating_modifier (.+?)/)
           c.floating_modifier = md[0]
         end
-        if md = l .match(/bindsym ([\w|\+]+)\s(.+?)/)
-          c.add_shortcut md[0], md[1]
+        if md = l.match(/mode"(.+?)"/)
+          cur_mode = md[1].to_sym
+        end
+        if md = l.match(/bindsym ([\w|\+]+)\s(.+?)/)
+          c.modes[cur_mode].bindsym md[1], md[2]
         end
       end
       c
@@ -38,14 +42,19 @@ module I3
     def to_s
       s = ""
       s += "#{ "floating_modifier #{floating_modifier}" if floating_modifier }\n\n"
-      default_mode.shortcuts.each do |sym, action|
-        s += "bindsym #{sym} #{action}\n"
+      modes.each do |name, mode|
+        s += "mode \"#{name}\" {\n"
+        mode.shortcuts.each do |sym, action|
+          s += "bindsym #{sym} #{action}\n"
+        end
+        s += "}\n\n"
       end
+      
       s += "\n"
       s
     end
 
-    attr_reader :modes
+    attr_reader :modes, :cur_mode
 
     def add_mode(name)
       @modes[name] = Mode.new
@@ -57,9 +66,6 @@ module I3
     def default_mode
       @modes[:default]
     end
-
-    extend Forwardable
-    def_delegator :default_mode, :bindsym
 
   end
 end

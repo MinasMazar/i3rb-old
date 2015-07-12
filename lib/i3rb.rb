@@ -3,6 +3,7 @@ require "i3rb/api"
 require "i3rb/config"
 require "i3rb/bar"
 require "logger"
+require "pry"
 
 $logger = Logger.new STDERR
 $debug = false

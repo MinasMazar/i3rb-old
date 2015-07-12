@@ -1,4 +1,4 @@
-require 'json'
+require 'i3ipc'
 
 module I3
   module API
@@ -44,15 +44,34 @@ module I3
       end
     end
 
+    def i3send(msg)
+      system_i3msg msg
+      #i3ipc msg
+    end
+
+    attr_reader :connection
+
+    def connection
+      @connection ||= I3Ipc::Connection.new
+    end
+
     protected
   
-    def i3send(*msg)
+    def system_i3msg(*msg)
       msg = msg.join(", ")
       ret = JSON.parse `i3-msg #{msg}`
-      $logger.debug "i3-send: < #{msg} > => #{ret}" if $debug
+      $logger.debug "system:i3-msg < #{msg} > => #{ret}" if $debug
       return yield(ret) if block_given?
       ret
     end
-  
+
+    def i3ipc(*msg)
+      msg = msg.join(", ")
+      ret = connection.command msg
+      $logger.debug "i3-ipc < #{msg} > => #{ret}" if $debug
+      return yield(ret) if block_given?
+      ret 
+    end
+
   end
 end

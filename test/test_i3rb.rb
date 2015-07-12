@@ -17,6 +17,10 @@ class TestI3rb < Minitest::Test
     assert_kind_of Hash, @@api_driver.current_workspace
   end
 
+  def test_launch_terminal
+    @@api_driver.exec 'i3-sensible-terminal'
+  end
+
   def untest_I3BAR_launch_bar
     @@i3bar.add_widget I3::Bar::BasicWidgets::Hostname
     @@i3bar.run_widgets
