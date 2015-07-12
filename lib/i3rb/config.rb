@@ -16,6 +16,23 @@ module I3
 
     attr_accessor :path, :floating_modifier, :mod_key
 
+    def self.backup_config
+      orig_config = "~/.i3/config"
+      orig_config = File.read orig_config
+      bkp_config = "~/.i3/config.bkp"
+      File.write bkp_config, orig_config
+    end
+
+    def self.write_i3rb_config(config)
+      orig_config = "~/.i3/config"
+      File.write orig_config, config.to_s
+    end
+
+    def self.apply_i3rb_config(config)
+      backup_config
+      write_i3rb_config config
+    end
+
     def self.from_file(pathname)
       f = File.readlines pathname
       cur_mode = :default

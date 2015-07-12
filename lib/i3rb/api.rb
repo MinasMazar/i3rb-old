@@ -50,12 +50,13 @@ module I3
 
     def i3send(msg)
       self.buffer << msg
-      flush! if self.buffer.size >= 2
+      flush! if self.buffer.size >= 1
     end
 
     def flush!
-      system_i3msg buffer.join(", ")
+      ret = system_i3msg buffer.join(", ")
       @buffer = []
+      ret
     end
 
     attr_reader :connection

@@ -32,7 +32,7 @@ class TestI3rb < Minitest::Test
     nc = I3::Config.new
     nc.mod_key = 'Mod1'
     nc.floating_modifier = 'Mod1'
-    nc.bindsym 'mod+o', 'exec i3-sensible-terminal'
+    nc.default_mode.bindsym 'mod+o', 'exec i3-sensible-terminal'
     assert_instance_of I3::Config::Mode, nc.default_mode
     nc.add_mode :launch do |m|
       m.bindsym "Mod1+3", "workspace 3"
