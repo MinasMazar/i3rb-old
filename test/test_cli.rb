@@ -13,4 +13,8 @@ class TestCLI < Minitest::Test
     @@driver.run ["goto_workspace", "69"]
   end
 
+  def test_exec_terminal_app
+    @@driver.run ["exec", "i3-sensible-terminal", "-e", "top" ]
+  end
+
 end

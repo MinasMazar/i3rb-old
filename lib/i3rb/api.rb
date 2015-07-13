@@ -34,8 +34,8 @@ module I3
       i3send "focus output #{out}"
     end
 
-    def exec(cmd)
-      i3send "exec \"#{cmd}\""
+    def exec(*cmd)
+      i3send "exec \"#{cmd.join(" ")}\""
     end
 
     [ :restart, :reload, :quit ].each do |meth|
