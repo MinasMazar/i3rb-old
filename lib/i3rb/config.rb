@@ -1,17 +1,18 @@
 module I3
   class Config
 
-    module Shortcuts
+    module Bindsyms
+      attr_reader :bindsyms
       def bindsym(sym, action)
-        shortcuts["#{sym}"] = action
-      end
-      def shortcuts
-        @shortcuts ||= {}
+        @bindsyms["#{sym}"] = action
       end
     end
 
     class Mode
-      include Shortcuts
+      include Bindsyms
+      def initialize
+        @bindsyms = {}
+      end
     end
 
     attr_accessor :path, :floating_modifier, :mod_key
@@ -35,53 +36,63 @@ module I3
 
     def self.from_file(pathname)
       f = File.readlines pathname
-      cur_mode = :default
       c = new
+      cur_mode = :default
       f.each do |l|
         if md = l.match(/floating_modifier (.+?)/)
           c.floating_modifier = md[0]
         end
-        if md = l.match(/mode"(.+?)"/)
+        if md = l.match(/mode\s+"(.+?)"/)
           cur_mode = md[1].to_sym
         end
-        if md = l.match(/bindsym ([\w|\+]+)\s(.+?)/)
-          c.modes[cur_mode].bindsym md[1], md[2]
+        if md = l.match(/\}/)
+          cur_mode = :default
+        end
+        if md = l.match(/bindsym ([\w|\d|\+]+)\s(.+)/)
+          c.get_mode(cur_mode).bindsym md[1], md[2]
         end
       end
       c
     end
 
     def initialize
-      @modes = {}
-      add_mode :default
+      @modes = { :default => Mode.new }
     end
 
     def to_s
-      s = ""
-      s += "#{ "floating_modifier #{floating_modifier}" if floating_modifier }\n\n"
-      modes.each do |name, mode|
-        s += "mode \"#{name}\" {\n"
-        mode.shortcuts.each do |sym, action|
-          s += "bindsym #{sym} #{action}\n"
-        end
-        s += "}\n\n"
+      s = []
+      s << "floating_modifier #{floating_modifier}" if floating_modifier
+      default_mode.bindsyms.each do |sym, action|
+        s << "bindsym #{sym} #{action}"
       end
-      
-      s += "\n"
-      s
+      modes_without_default.each do |name, mode|
+        s << "mode \"#{name}\" {"
+        mode.bindsyms.each do |sym, action|
+          s << "bindsym #{sym} #{action}"
+        end
+        s << "}\n"
+      end
+      s.join "\n"
     end
 
     attr_reader :modes, :cur_mode
 
-    def add_mode(name)
-      @modes[name] = Mode.new
+    def get_mode(name)
+      @modes[name] ||= Mode.new
       if block_given?
         yield @modes[name]
       end
+      @modes[name]
     end
+
+    alias :add_mode :get_mode
 
     def default_mode
       @modes[:default]
+    end
+
+    def modes_without_default
+      @modes.select {|k,v| k != :default }
     end
 
   end
