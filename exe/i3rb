@@ -12,7 +12,7 @@ end
 
 #$debug = true
 
-driver = Object.new.extend I3::API
+driver = Object.new.extend I3::CLI
 class << driver
   def current_workspace_name
     current_workspace["name"]
@@ -23,11 +23,4 @@ class << driver
   end
 end
 
-ARGV.join(" ").split(",").each do |cmd|
-  cmd, args = cmd.split[0], cmd.split[1..-1]
-  if args.any?
-    puts driver.send cmd, *args
-  else
-    puts driver.send cmd
-  end
-end
+driver.run
