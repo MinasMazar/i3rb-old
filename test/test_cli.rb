@@ -17,4 +17,11 @@ class TestCLI < Minitest::Test
     @@driver.run ["exec", "i3-sensible-terminal", "-e", "top" ]
   end
 
+  def test_goto_workspace_stdin
+    @@driver.run ["goto_workspace", "_stdin_"]
+  end
+
+  def test_goto_workspace_dmenu
+    @@driver.run ["goto_workspace", "_dmenu_"]
+  end
 end

@@ -3,6 +3,7 @@ require "i3rb/api"
 require "i3rb/config"
 require "i3rb/bar"
 require "i3rb/cli"
+require "i3rb/dmenu"
 require "logger"
 require "pry"
 

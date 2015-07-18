@@ -1,12 +1,19 @@
+require 'i3rb/api'
+require 'i3rb/dmenu'
+
 module I3
   module CLI
 
     include I3::API
+    include I3::DMenu
 
     def self.run(args)
+      dmenu = DMenu.get_instance
       args.map! do |arg|
         if arg == "_stdin_"
           $stdin.readline.chomp
+        elsif arg == "_dmenu_"
+          dmenu.get_string
         else
           arg
         end
@@ -16,9 +23,6 @@ module I3
       
       driver = Object.new.extend I3::API
       class << driver
-        def current_workspace_name
-          current_workspace["name"]
-        end
         
         def method_missing(m,*a,&b)
           i3send "#{m} #{a.join(" ")}", &b
@@ -27,6 +31,8 @@ module I3
       
       args.join(" ").split(",").each do |cmd|
         cmd, args = cmd.split[0], cmd.split[1..-1]
+        args = [] if args == [""]
+        $logger.debug "Driver##{cmd}(#{args.inspect})"
         if args.any?
           puts driver.send cmd, *args
         else
