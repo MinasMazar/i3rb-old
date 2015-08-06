@@ -62,23 +62,29 @@ module I3
     attr_reader :connection
 
     def connection
-      @connection ||= I3Ipc::Connection.new
+      @connection ||= reset_connection!
+    end
+
+    def reset_connection!
+      @connection = I3Ipc::Connection.new
     end
 
     protected
   
     def system_i3msg(*msg)
       msg = msg.join(", ")
+      $logger.debug "system:i3-msg < #{msg} >" if $debug
       ret = JSON.parse `i3-msg #{msg}`
-      $logger.debug "system:i3-msg < #{msg} > => #{ret}" if $debug
+      $logger.debug "=> #{ret}" if $debug
       return yield(ret) if block_given?
       ret
     end
 
     def i3ipc(*msg)
       msg = msg.join(", ")
+      $logger.debug "i3-ipc < #{msg} >" if $debug
       ret = connection.command msg
-      $logger.debug "i3-ipc < #{msg} > => #{ret}" if $debug
+      $logger.debug "=> #{ret}" if $debug
       return yield(ret) if block_given?
       ret 
     end
