@@ -1,23 +1,41 @@
 require 'minitest_helper'
+require 'benchmark'
 
 class TestDMenu < Minitest::Test
 
   @@dmenu = I3::DMenu.get_instance
-  @@dmenu.entries = [ "AB", "NORMAL"]
+  @@dmenu.lines = 3
+  @@dmenu.items = [ "AB", "NORMAL", "BRAIN"]
+
+  def _test_dmenu_run__pipe_impl
+    ret =  @@dmenu.run__pipe_impl
+    assert_instance_of I3::DMenu::Item, ret
+  end
+
+  def _test_dmenu_run__sys_call_impl
+    ret =  @@dmenu.run__sys_call_impl
+    assert_instance_of I3::DMenu::Item, ret
+  end
 
   def test_dmenu_get_string
-    assert_instance_of String, @@dmenu.get_string
+    ret =  @@dmenu.get_string
+    assert_instance_of String, ret
   end
 
   def test_dmenu_get_array
-    assert_instance_of Array, @@dmenu.get_array
+    ret =  @@dmenu.get_array
+    assert_instance_of Array, ret
   end
 
-  include I3::DMenu
-
-  def test_dmenu_included_module
-    assert_kind_of I3::DMenu, dmenu
-    assert_respond_to dmenu, :get_string
+  def test_benchmark
+    Benchmark.bm do |bm|
+      bm.report "syscall" do
+        @@dmenu.run__sys_call_impl
+      end
+      bm.report "pipe" do
+        @@dmenu.run__pipe_impl
+      end
+    end
   end
 
 end
