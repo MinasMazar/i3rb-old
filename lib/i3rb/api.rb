@@ -54,7 +54,7 @@ module I3
     end
 
     def flush!
-      ret = system_i3msg buffer.join(", ")
+      ret = i3ipc buffer.join(", ")
       @buffer = []
       ret
     end
