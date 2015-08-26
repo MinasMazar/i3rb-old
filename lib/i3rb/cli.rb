@@ -4,14 +4,25 @@ require 'i3rb/dmenu'
 module I3
   module CLI
 
+    module Macros
+
+      def get_workspaces
+        super.map { |ws| ws["name"] }
+      end
+    end
+
     include I3::API
     include I3::DMenu
+    include I3::CLI::Macros
 
-    def self.run(args)
+    def run(args)
       dmenu = DMenu.get_instance
       args.map! do |arg|
         if arg == "_stdin_"
           $stdin.readline.chomp
+        elsif arg == "_dmenu_ws_"
+          dmenu.items.concat get_workspaces
+          dmenu.get_string
         elsif arg == "_dmenu_"
           dmenu.get_string
         else
@@ -21,22 +32,21 @@ module I3
       
       #$debug = true
       
-      driver = Object.new.extend I3::API
+      driver = Object.new
+      driver.extend I3::API
+      driver.extend I3::CLI::Macros
       
       args.join(" ").split(",").each do |cmd|
-        cmd, args = cmd.split[0], cmd.split[1..-1]
+        cmd = cmd.split
+        meth, args = cmd.shift, cmd
         args = [] if args == [""]
-        $logger.debug "Driver##{cmd}(#{args.inspect})"
+        $logger.debug "Driver##{meth}(#{args.inspect})"
         if args.any?
-          puts driver.send cmd, *args
+          puts self.send meth, args.join(" ")
         else
-          puts driver.send cmd
+          puts self.send meth
         end
       end
-    end
-
-    def run(args = ARGV)
-      CLI.run args
     end
 
   end

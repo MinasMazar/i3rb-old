@@ -13,12 +13,12 @@ module I3
   
     def current_workspace
       ws = get_workspaces.find {|w| w["focused"]}
-      ws.extend Workspace if ws
+      ws.extend Workspace
     end
 
     def current_workspaces
       wss = get_outputs.select {|o| o["current_workspace"] != nil }
-      wss.map! {|ws| ws.extend Workspace } if wss && wss.any?
+      wss.map! {|ws| ws.extend Workspace }
     end
 
     def get_active_outputs
@@ -82,8 +82,7 @@ module I3
 
     def system_i3pipe(*msg)
       msg = msg.join(", ")
-      msg = msg.split(" ")
-      command = [ "i3-msg", *msg ]
+      command = [ "i3-msg" ] + msg
       pipe = IO.popen(command, "w+")
       ret = pipe.read
       pipe.close
@@ -103,7 +102,7 @@ module I3
       end
     end
 
-    alias :exec_i3send :system_i3pipe
+    alias :exec_i3send :system_i3msg
 
   end
 end

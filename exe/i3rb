@@ -13,14 +13,4 @@ end
 #$debug = true
 
 driver = Object.new.extend I3::CLI
-class << driver
-  def current_workspace_name
-    current_workspace["name"]
-  end
-  
-  def method_missing(m,*a,&b)
-    i3send "#{m} #{a.join(" ")}", &b
-  end
-end
-
-driver.run
+driver.run ARGV
