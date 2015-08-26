@@ -18,6 +18,7 @@ class TestCLI < Minitest::Test
   end
 
   def test_goto_workspace_stdin
+    puts "\nInsert workspace to switch to: "
     @@driver.run ["goto_workspace", "_stdin_"]
   end
 

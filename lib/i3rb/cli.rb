@@ -22,12 +22,6 @@ module I3
       #$debug = true
       
       driver = Object.new.extend I3::API
-      class << driver
-        
-        def method_missing(m,*a,&b)
-          i3send "#{m} #{a.join(" ")}", &b
-        end
-      end
       
       args.join(" ").split(",").each do |cmd|
         cmd, args = cmd.split[0], cmd.split[1..-1]

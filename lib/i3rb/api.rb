@@ -84,7 +84,6 @@ module I3
       msg = msg.join(", ")
       msg = msg.split(" ")
       command = [ "i3-msg", *msg ]
-      binding.pry
       pipe = IO.popen(command, "w+")
       ret = pipe.read
       pipe.close
