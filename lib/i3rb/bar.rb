@@ -13,17 +13,18 @@ module I3
         @text = name
         @active = true
         options.each do |k,v|
-          self.send "#{k}=", v
+          self.send "#{k}=", v if self.respond_to? "#{k}="
         end
-        @timeout = timeout
+        @timeout = timeout.to_i.abs
+        @timeout = 0 if options[:once] == true
         @proc = proc
       end
 
       def pos
-        pos || -1
+        @pos || -1
       end
 
-      def stop
+      def kill
         @run_th && @run_th.kill
       end
 
@@ -31,6 +32,7 @@ module I3
         @run_th = Thread.new do
           loop do
             @text = @proc.call self
+            break if @timeout <= 0
             sleep @timeout.to_i
           end
         end
@@ -38,17 +40,19 @@ module I3
 
       def to_i3bar_protocol
         h = {
-          "full_text" => @text,
-          "color" => @color,
-          "name" => name,
-          "instance" => "#{name}-#{hash}"
+          "full_text" => @text
         }
+        h.merge! "color" => @color if @color
+        h.merge! "name" => name if @name
+        h.merge! "instance" => "#{name}-#{hash}" if @name
         h
       end
 
     end
 
     class Instance
+
+      attr_reader :widgets
 
       def initialize
         @widgets = []
@@ -57,20 +61,28 @@ module I3
       end
 
       def add_widget(widget)
-        return nil unless widget.kind_of? Widget
         @widgets << widget
-        widget
+        normalize_widgets_array
       end
 
+      alias :add_widgets :add_widget
+
       def run(secs)
-        @widgets.each { |w| w.run }
+        start_widgets
         stdout_attach secs
       end
 
-      def widgets_to_stdout
+      def start_widgets
+        @widgets.each { |w| w.run }
       end
 
-      private
+      def stop_widgets
+        @widgets.each { |w| w.kill }
+      end
+
+      def read_event
+        $stdin.read
+      end
 
       def stdout_attach(sec)
         begin
@@ -93,12 +105,18 @@ module I3
         end
       end
 
+      private
+
+      def normalize_widgets_array
+        @widgets.replace @widgets.flatten.select {|w| w.kind_of? Widget }
+      end
+
     end
 
     module Widgets
     end
 
-    require 'i3rb/bar/widgets/hostname'
+    require 'i3rb/bar/widgets/basic_widgets'
 
     def self.get_instance
       Instance.new
