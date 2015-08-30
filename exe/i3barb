@@ -1,0 +1,6 @@
+#!/bin/ruby
+
+require 'i3rb'
+
+i3bar = I3::Bar.get_instance
+i3bar.stdout_attach 1

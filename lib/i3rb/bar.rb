@@ -1,34 +1,26 @@
+require 'json'
+
 module I3
   module Bar
 
     class Widget
 
-      attr_reader :name, :options
-      attr_accessor :timeout, :proc
-
-      def self.from_desc(desc)
-        new desc[:name], desc[:timeout], desc[:options], &desc[:proc]
-      end
+      attr_accessor :name, :timeout, :block
+      attr_accessor :pos, :color
 
       def initialize(name, timeout, options = {}, &proc)
         @name = name
-        @text = "..."
+        @text = name
         @active = true
-        @options = options
-        self.timeout = timeout
-        self.set_proc(&proc)
+        options.each do |k,v|
+          self.send "#{k}=", v
+        end
+        @timeout = timeout
+        @proc = proc
       end
 
       def pos
-        @options[:pos] || -1
-      end
-
-      def active?
-        @options[:active] != false
-      end
-
-      def set_proc(&proc)
-        @proc = proc
+        pos || -1
       end
 
       def stop
@@ -38,57 +30,72 @@ module I3
       def run
         @run_th = Thread.new do
           loop do
-            #@text = binding.call @proc
-            @text = self.proc.call
-            break if @timeout.to_i <= 0
+            @text = @proc.call self
             sleep @timeout.to_i
           end
         end
       end
 
-      def eval
-        active? ? @text : ''
-      end
-
-    end
-
-    module Methods
-
-      def widgets
-        @widgets ||= []
-      end
-
-      def add_widget(widget)
-        if widget.is_a? Hash
-          widget = Widget.from_desc widget
-        end
-        self.widgets << widget if widget.kind_of? Widget
-      end
-
-      def to_s
-        widgets.map(&:eval).map(&:chomp).join(" | ").to_s
-      end
-    
-      def to_stdout
-        $stdout.write to_s + "\n"
-        $stdout.flush\
-      end
-    
-      def stdout_attach(sec)
-        loop do
-          to_stdout
-          sleep sec
-        end
-      end
-    
-      def run_widgets
-        widgets.each { |w| w.run if w.active? }
+      def to_i3bar_protocol
+        h = {
+          "full_text" => @text,
+          "color" => @color,
+          "name" => name,
+          "instance" => "#{name}-#{hash}"
+        }
+        h
       end
 
     end
 
     class Instance
-      include Methods
+
+      def initialize
+        @widgets = []
+        #@header = { "version"=> 1, "stop_signal"=> 10, "cont_signal"=> 12, "click_events"=> true }
+        @header = { "version" => 1 }
+      end
+
+      def add_widget(widget)
+        return nil unless widget.kind_of? Widget
+        @widgets << widget
+        widget
+      end
+
+      def run(secs)
+        @widgets.each { |w| w.run }
+        stdout_attach secs
+      end
+
+      def widgets_to_stdout
+      end
+
+      private
+
+      def stdout_attach(sec)
+        begin
+          #$stdout.write JSON.generate(@header) + "\n"
+          $stdout.write "{ \"version\": 1 }\n"
+          sleep 0.5
+          $stdout.write "[" + "\n"
+          sleep 0.5
+          $stdout.write [].to_s + "\n"
+          sleep 0.8
+          loop do
+            $stdout.write "," + JSON.generate(@widgets.map(&:to_i3bar_protocol)) + "\n"
+            $stdout.flush
+            sleep sec
+          end
+          $stdout.write "]\n"
+        rescue Interrupt
+        ensure
+          $stdout.write "]\n"
+        end
+      end
+
+    end
+
+    module Widgets
     end
 
     require 'i3rb/bar/widgets/hostname'

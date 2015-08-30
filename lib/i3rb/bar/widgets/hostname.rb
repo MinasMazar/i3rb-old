@@ -1,13 +1,10 @@
 module I3
   module Bar
-    module BasicWidgets
+    module Widgets
 
-      Hostname = {
-        name: 'hostname',
-        timeout: 100,
-        options: {},
-        proc: -> { [`whoami`, '@',  `hostname`].map(&:chomp).join}
-      }
+      HOSTNAME = Widget.new 'hostname', 100, color: "#FFFFFF" do
+        [ `whoami`.chomp, '@',  `hostname`.chomp ].join
+      end
 
     end
   end
