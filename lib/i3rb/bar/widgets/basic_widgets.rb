@@ -6,7 +6,7 @@
         [ `whoami`.chomp, '@',  `hostname`.chomp ].join
       end
 
-      CALENDAR = Widget.new 'time', 1 do
+      CALENDAR = Widget.new 'calendar', 1 do
         Time.new.strftime('%d-%m-%Y %H:%M:%S')
       end
 

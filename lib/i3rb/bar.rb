@@ -3,7 +3,48 @@ require 'json'
 module I3
   module Bar
 
+    module EventHandler
+
+      def instance
+        if respond_to? :name
+          "#{name}-#{__id__}"
+        else
+          "#{self.class}-#{__id__}"
+        end
+      end
+
+      def event_callbacks
+        @ecbs ||= []
+      end
+
+      def add_event_callback(&ecb)
+        event_callbacks << ecb
+      end
+
+      def notify_event(ev)
+        return nil unless is_receiver?(ev) && !respond_to_all?
+        notify_event! ev
+      end
+
+      def notify_event!(ev)
+        event_callbacks.map do |cb|
+          cb.call self, ev
+        end
+      end
+
+      def is_receiver?(ev)
+        ev["instance"] == instance
+      end
+
+      def respond_to_all?
+        @options[:respond_to_all]
+      end
+
+    end
+
     class Widget
+
+      include EventHandler
 
       attr_accessor :name, :timeout, :block
       attr_accessor :pos, :color
@@ -12,9 +53,9 @@ module I3
         @name = name
         @text = name
         @active = true
-        options.each do |k,v|
-          self.send "#{k}=", v if self.respond_to? "#{k}="
-        end
+        @options = options
+        @color = @options[:color] if @options[:color]
+        @pos = @options[:pos] if @options[:pos]
         @timeout = timeout.to_i.abs
         @timeout = 0 if options[:once] == true
         @proc = proc
@@ -42,9 +83,9 @@ module I3
         h = {
           "full_text" => @text
         }
-        h.merge! "color" => @color if @color
-        h.merge! "name" => name if @name
-        h.merge! "instance" => "#{name}-#{hash}" if @name
+        h.merge! "color" => self.color if @color
+        h.merge! "name" => name
+        h.merge! "instance" => instance
         h
       end
 
@@ -52,20 +93,28 @@ module I3
 
     class Instance
 
-      attr_reader :widgets
+      include EventHandler
 
-      def initialize
+      def initialize(stream_in, stream_out)
+        @stream_in, @stream_out = stream_in, stream_out
         @widgets = []
-        #@header = { "version"=> 1, "stop_signal"=> 10, "cont_signal"=> 12, "click_events"=> true }
-        @header = { "version" => 1 }
+        @header = { "version"=> 1, "stop_signal"=> 10, "cont_signal"=> 12, "click_events"=> true }
+        #@header = { "version" => 1 }
       end
 
       def add_widget(widget)
         @widgets << widget
-        normalize_widgets_array
       end
 
       alias :add_widgets :add_widget
+
+      def widget(w)
+        widgets.find { |_w| _w.name == w }
+      end
+
+      def widgets
+        @widgets.flatten.reject {|w| !w.kind_of? Widget }
+      end
 
       def run(secs)
         start_widgets
@@ -73,42 +122,61 @@ module I3
       end
 
       def start_widgets
-        @widgets.each { |w| w.run }
+        widgets.each { |w| w.run }
       end
 
       def stop_widgets
-        @widgets.each { |w| w.kill }
+        widgets.each { |w| w.kill }
       end
 
-      def read_event
-        $stdin.read
+      def start_events_capturing
+        @event_th = Thread.new do
+          read_event_loop
+        end
+      end
+
+      attr_reader :event, :event_th
+
+      def stop_events_capturing
+        @event = nil
+        @event_th && @event_th.kill
       end
 
       def stdout_attach(sec)
         begin
-          #$stdout.write JSON.generate(@header) + "\n"
-          $stdout.write "{ \"version\": 1 }\n"
+          @stream_out.write JSON.generate(@header) + "\n"
           sleep 0.5
-          $stdout.write "[" + "\n"
+          @stream_out.write "[" + "\n"
           sleep 0.5
-          $stdout.write [].to_s + "\n"
+          @stream_out.write [].to_s + "\n"
           sleep 0.8
           loop do
-            $stdout.write "," + JSON.generate(@widgets.map(&:to_i3bar_protocol)) + "\n"
-            $stdout.flush
+            @stream_out.write "," + JSON.generate(widgets.map(&:to_i3bar_protocol)) + "\n"
+            @stream_out.flush
             sleep sec
           end
-          $stdout.write "]\n"
         rescue Interrupt
         ensure
-          $stdout.write "]\n"
+          @stream_out.write "]\n"
+          @stream_out.flush
         end
       end
 
       private
 
-      def normalize_widgets_array
-        @widgets.replace @widgets.flatten.select {|w| w.kind_of? Widget }
+      def read_event_loop
+        loop do
+          l = @stream_in.readline.chomp
+          if md = l.match(/(\{.+\})/)
+            begin
+              @event = JSON.parse md[1]
+              notify_event! @event
+              widgets.map { |w| w.notify_event @event }
+            rescue
+              nil
+            end
+          end
+        end
       end
 
     end
@@ -118,8 +186,8 @@ module I3
 
     require 'i3rb/bar/widgets/basic_widgets'
 
-    def self.get_instance
-      Instance.new
+    def self.get_instance(stream_in = $stdin, stream_out = $stdout)
+      Instance.new stream_in, stream_out
     end
 
   end

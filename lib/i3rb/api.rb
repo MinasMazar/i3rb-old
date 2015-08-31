@@ -42,7 +42,7 @@ module I3
       i3send "exec \"#{cmd.join(" ")}\""
     end
 
-    [ :restart, :reload, :quit ].each do |meth|
+    [ :restart, :reload, :quit, :kill ].each do |meth|
       define_method meth do
         i3send "#{meth}"
       end
