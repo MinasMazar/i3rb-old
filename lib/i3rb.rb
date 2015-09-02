@@ -4,6 +4,7 @@ require "i3rb/config"
 require "i3rb/bar"
 require "i3rb/cli"
 require "i3rb/dmenu"
+require "i3rb/nagbar"
 require "logger"
 require "pry"
 
