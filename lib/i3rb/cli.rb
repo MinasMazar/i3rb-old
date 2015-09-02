@@ -9,6 +9,12 @@ module I3
       def get_workspaces
         super.map { |ws| ws["name"] }
       end
+
+      def move_and_goto_workspace(ws)
+        move_to_workspace ws
+        goto_workspace ws
+      end
+
     end
 
     include I3::API

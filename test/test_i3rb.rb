@@ -14,13 +14,19 @@ class TestI3rb < Minitest::Test
     refute_nil ::I3::VERSION
   end
 
-  def test_I3API_methods
+  def test_API
     [ :restart, :quit, :reload, :goto_workspace ].each do |meth|
       assert_respond_to @@api_driver, meth
     end
     assert_kind_of Array, @@api_driver.get_workspaces
     assert_kind_of Hash, @@api_driver.current_workspace
     assert_kind_of Array, @@api_driver.current_workspaces
+  end
+
+  def test_bad_API
+    assert_raises do
+      @@api_driver.i3send "very invalid commmand"
+    end
   end
 
   def test_benchmark

@@ -46,7 +46,7 @@ module I3
 
       include EventHandler
 
-      attr_accessor :name, :timeout, :block
+      attr_accessor :name, :text, :timeout, :block
       attr_accessor :pos, :color
 
       def initialize(name, timeout, options = {}, &proc)
