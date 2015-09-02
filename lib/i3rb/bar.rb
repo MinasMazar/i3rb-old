@@ -194,9 +194,10 @@ module I3
     require 'i3rb/bar/widgets/basic_widgets'
 
     def self.get_instance(stream_in = nil, stream_out = nil, options = {})
-      stream_in ||= stream_in
-      stream_out ||= stream_out
-      Instance.new stream_in, stream_out, options
+      stream_in ||= $stdin
+      stream_out ||= $stdout
+      init_proc = Proc.new if block_given?
+      Instance.new stream_in, stream_out, options, &init_proc
     end
 
   end
