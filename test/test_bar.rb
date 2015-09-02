@@ -4,10 +4,20 @@ class TestBar < Minitest::Test
 
   def test_i3bar_setup
     i3bar = I3::Bar.get_instance
+    assert_kind_of Array, i3bar.widgets
+  end
+
+  def test_i3bar_setup_with_options
+    i3bar = I3::Bar.get_instance nil, nil, "click_events" => false
+    assert i3bar.options.include? "click_events"
+    refute i3bar.instance_variable_get("@header")["click_events"], "Options assignment error."
+  end
+
+  def test_widgets
+    i3bar = I3::Bar.get_instance
     i3bar.add_widget I3::Bar::Widgets::HOSTNAME
     i3bar.add_widgets [ I3::Bar::Widgets::CALENDAR, I3::Bar::Widgets::WIFI ]
     i3bar.add_widget I3::Bar::Widgets::TEMPERATURE
-    assert_kind_of Array, i3bar.widgets
   end
 
   def untest_i3bar_running

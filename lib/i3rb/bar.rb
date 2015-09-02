@@ -95,11 +95,18 @@ module I3
 
       include EventHandler
 
-      def initialize(stream_in, stream_out)
+      attr_reader :options
+
+      def initialize(stream_in, stream_out, options = {})
         @stream_in, @stream_out = stream_in, stream_out
         @widgets = []
         @header = { "version"=> 1, "stop_signal"=> 10, "cont_signal"=> 12, "click_events"=> true }
+        @options = options
+        [ "stop_signal", "cont_signal", "click_events"].each do |opt|
+          @header[opt] = options[opt] if options.include? opt
+        end
         #@header = { "version" => 1 }
+        yield self if block_given?
       end
 
       def add_widget(widget)
@@ -186,8 +193,10 @@ module I3
 
     require 'i3rb/bar/widgets/basic_widgets'
 
-    def self.get_instance(stream_in = $stdin, stream_out = $stdout)
-      Instance.new stream_in, stream_out
+    def self.get_instance(stream_in = nil, stream_out = nil, options = {})
+      stream_in ||= stream_in
+      stream_out ||= stream_out
+      Instance.new stream_in, stream_out, options
     end
 
   end
