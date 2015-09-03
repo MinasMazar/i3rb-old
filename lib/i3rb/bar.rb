@@ -1,96 +1,9 @@
 require 'json'
+require 'i3rb/bar/event'
+require 'i3rb/bar/widget'
 
 module I3
   module Bar
-
-    module EventHandler
-
-      def instance
-        if respond_to? :name
-          "#{name}-#{__id__}"
-        else
-          "#{self.class}-#{__id__}"
-        end
-      end
-
-      def event_callbacks
-        @ecbs ||= []
-      end
-
-      def add_event_callback(&ecb)
-        event_callbacks << ecb
-      end
-
-      def notify_event(ev)
-        return nil unless is_receiver?(ev) && !respond_to_all?
-        notify_event! ev
-      end
-
-      def notify_event!(ev)
-        event_callbacks.map do |cb|
-          cb.call self, ev
-        end
-      end
-
-      def is_receiver?(ev)
-        ev["instance"] == instance
-      end
-
-      def respond_to_all?
-        @options[:respond_to_all]
-      end
-
-    end
-
-    class Widget
-
-      include EventHandler
-
-      attr_accessor :name, :text, :timeout, :block
-      attr_accessor :pos, :color
-
-      def initialize(name, timeout, options = {}, &proc)
-        @name = name
-        @text = name
-        @active = true
-        @options = options
-        @color = @options[:color] if @options[:color]
-        @pos = @options[:pos] if @options[:pos]
-        @timeout = timeout.to_i.abs
-        @timeout = 0 if options[:once] == true
-        @proc = proc
-      end
-
-      def pos
-        @pos || -1
-      end
-
-      def kill
-        @run_th && @run_th.kill
-      end
-
-      def run
-        @run_th = Thread.new do
-          loop do
-            @text = @proc.call self
-            break if @timeout <= 0
-            sleep @timeout.to_i
-          end
-        end
-      end
-
-      def to_i3bar_protocol
-        h = {
-          "full_text" => @text
-        }
-        h.merge! "color" => self.color if @color
-        h.merge! "name" => name
-        h.merge! "instance" => instance
-        h
-      end
-
-    end
-
     class Instance
 
       include EventHandler
