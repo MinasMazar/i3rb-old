@@ -28,7 +28,6 @@ module I3
     def start
       cmd_txt = "i3-nagbar -t warn -f #{@font} -m #{prompt} "
       self.buttons.each {|b| cmd_txt += " -b \"#{b.title}\" \"#{b.cmd};read\"" }
-      binding.pry
       system cmd_txt
     end
   end
