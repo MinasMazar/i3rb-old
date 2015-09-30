@@ -18,6 +18,8 @@ class TestBar < Minitest::Test
     i3bar.add_widget I3::Bar::Widgets::HOSTNAME
     i3bar.add_widgets [ I3::Bar::Widgets::CALENDAR, I3::Bar::Widgets::WIFI ]
     i3bar.add_widget I3::Bar::Widgets::TEMPERATURE
+    i3bar.add_widget "This is not a Widget instance"
+    assert_equal 4, i3bar.widgets.size
   end
 
   def untest_i3bar_running

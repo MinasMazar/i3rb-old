@@ -33,7 +33,9 @@ module I3
       end
 
       def widgets
-        @widgets.flatten.reject {|w| !w.kind_of? Widget }
+	@widgets.flatten!
+	@widgets.reject! {|w| !w.kind_of? Widget }
+	@widgets
       end
 
       def run(secs)
