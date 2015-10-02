@@ -3,6 +3,7 @@ require 'i3ipc'
 module I3
   module API
 
+    class CommandError < StandardError; end
     module Workspace; end
 
     [ :get_workspaces, :get_outputs, :get_tree, :get_marks, :get_bar_config, :get_version ].each do |meth|
@@ -26,8 +27,11 @@ module I3
     end
 
     def goto_workspace(ws = :back_and_forth)
-      ws = 'back_and_forth' if ws == :back_and_forth
-      i3send "workspace #{ws}"
+      if ws.to_s.match /^\d+:?/
+	i3send "workspace number #{ws}"
+      else
+	i3send "workspace #{ws}"
+      end
     end
 
     def move_to_workspace(ws)
@@ -53,30 +57,20 @@ module I3
     end
 
     def i3send(msg)
-      self.buffer << msg
-      ret = exec_i3send buffer.join(", ") if buffer.size > 0
-      @buffer = []
+      ret = exec_i3send msg
       ret
     end
 
     attr_reader :connection
 
-    def connection
-      @connection ||= reset_connection!
-    end
-
-    def reset_connection!
-      @connection = I3Ipc::Connection.new
-    end
-
     protected
 
     def system_i3msg(*msg)
       msg = msg.join(", ")
-      $logger.debug "system:i3-msg < #{msg} >" if $debug
       ret = JSON.parse `i3-msg #{msg}`
-      $logger.debug "=> #{ret}" if $debug
+      $logger.debug "system:i3-msg < #{msg} > => #{ret}" if $debug
       return yield(ret) if block_given?
+      raise CommandError.new if ret && ret.any? && ret[0]["success"] == false
       ret
     end
 
@@ -85,20 +79,29 @@ module I3
       command = [ "i3-msg" ] + msg
       pipe = IO.popen(command, "w+")
       ret = pipe.read
+      $logger.debug "system:i3pipe < #{msg} > => #{ret}" if $debug 
+      raise CommandError.new ret[0]["error"] if ret && ret.any? && ret[0]["success"] == false
       pipe.close
       JSON.parse ret.chomp
     end
       
+    def connection
+      @connection ||= reset_connection!
+    end
+
+    def reset_connection!
+      @connection = I3Ipc::Connection.new
+    end
+
     def i3ipc(*msg)
       msg = msg.join(", ")
-      $logger.debug "i3-ipc < #{msg} >" if $debug
       ret = connection.command msg
-      $logger.debug "=> #{ret}" if $debug
+      $logger.debug "system:i3-ipc < #{msg} > => #{ret}" if $debug
       return yield(ret) if block_given?
       if ret[0].success?
         ret[0].to_h
       else
-        ret[0]
+        raise CommandError.new ret[0]["error"]
       end
     end
 
