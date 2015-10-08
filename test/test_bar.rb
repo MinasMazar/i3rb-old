@@ -22,9 +22,10 @@ class TestBar < Minitest::Test
     assert_equal 4, i3bar.widgets.size
   end
 
-  def untest_i3bar_running
+  def test_i3bar_running
     i3bar = I3::Bar.get_instance
     i3bar.add_widget I3::Bar::Widgets::BASIC
+    Thread.new { sleep 10; exit }
     i3bar.run 1
   end
 
@@ -71,6 +72,13 @@ class TestBar < Minitest::Test
 
     fin.close
     fout.close
+  end
+
+  def test_procs_for_debugging_purposes
+    I3::Bar::Widgets::BASIC.each do |w|
+      p = w.instance_variable_get "@proc"
+      p.call w
+    end
   end
 
 end

@@ -44,7 +44,26 @@
         out
       end
 
-      BASIC = [ HOSTNAME, WIFI, TEMPERATURE, CALENDAR ]
+      BATTERY = Widget.new 'battery', 60 do |w|
+	acpi_res = `acpi -b`
+	if md = acpi_res.match(/Battery\s(\d+):\s(\w+),\s(\d+)%/)
+	  status = md[2]
+	  charging_percentage = md[3].to_i
+	  if  charging_percentage > 70
+	    w.color = "#00FF00"
+	  elsif charging_percentage > 30
+	    w.color = "#00FFFF"
+	  else
+	    w.color = "#FF0000"
+	  end
+	  "BATTERY: #{charging_percentage}% #{status}"
+	else
+	  w.kill
+	  false
+	end
+      end
+
+      BASIC = [ HOSTNAME, WIFI, BATTERY, TEMPERATURE, CALENDAR ]
     end
   end
 end
