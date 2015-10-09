@@ -7,14 +7,23 @@ class TestDMenu < Minitest::Test
   @@dmenu.lines = 3
   @@dmenu.items = [ "AB", "NORMAL", "BRAIN"]
 
-  def _test_dmenu_run__pipe_impl
-    ret =  @@dmenu.run__pipe_impl
-    assert_instance_of I3::DMenu::Item, ret
+  def test_DMenu_get_instance_block_initialization
+    dmenu = I3::DMenu.get_instance do
+      set_prompt "Are you normal?"
+      set_items [ "AB", "NORMAL", "BRAIN" ]
+      set_lines 3
+    end
+    choice = dmenu.run
+    assert_includes [ "AB", "NORMAL", "BRAIN" ], choice.value
   end
 
-  def _test_dmenu_run__sys_call_impl
-    ret =  @@dmenu.run__sys_call_impl
-    assert_instance_of I3::DMenu::Item, ret
+  def test_DMenu_get_choice
+    choice = I3::DMenu.get_choice do
+      set_prompt "Are you normal?"
+      set_items [ "AB", "NORMAL", "BRAIN" ]
+      set_lines 3
+    end
+    assert_includes [ "AB", "NORMAL", "BRAIN" ], choice
   end
 
   def test_dmenu_get_string
@@ -27,7 +36,7 @@ class TestDMenu < Minitest::Test
     assert_instance_of Array, ret
   end
 
-  def test_benchmark
+  def untest_benchmark
     Benchmark.bm do |bm|
       bm.report "syscall" do
         @@dmenu.run__sys_call_impl

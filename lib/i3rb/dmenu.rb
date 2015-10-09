@@ -152,13 +152,21 @@ module I3
         @selected_background = nil
         @selected_foreground = nil
         @prompt              = nil
-	yield self if block_given?
+	instance_eval &Proc.new if block_given?
       end
     end
 
     def self.get_instance
-      Instance.new
+      if block_given?
+	Instance.new &Proc.new
+      else
+	Instance.new 
+      end
     end
 
+    def self.get_choice(&block)
+      dmenu = get_instance &block
+      dmenu.run.value
+    end
   end
 end
