@@ -18,28 +18,30 @@ module I3
       end
     end
 
+    extend ::GetterAndSetter
+
     # @return [Array<#to_s, Item>] Items to display in the menu. Items
     #   that are not an instance of the {Item} class will transparently
     #   be converted into one.
-    attr_accessor :items
+    attr_getter_and_setter :items
     # @return [Symbol<:top, :bottom>] Where to display the menu on screen.
-    attr_accessor :position
+    attr_getter_and_setter :position
     # @return [Boolean] If true, menu entries will be matched case insensitively.
-    attr_accessor :case_insensitive
+    attr_getter_and_setter :case_insensitive
     # @return [Number] Number of lines to display. If >1, dmenu will go into vertical mode.
-    attr_accessor :lines
+    attr_getter_and_setter :lines
     # @return [String] Which font to use.
-    attr_accessor :font
+    attr_getter_and_setter :font
     # @return [String] The background color of normal items.
-    attr_accessor :background
+    attr_getter_and_setter :background
     # @return [String] The foreground color of normal items.
-    attr_accessor :foreground
+    attr_getter_and_setter :foreground
     # @return [String] The background color of selected items.
-    attr_accessor :selected_background
+    attr_getter_and_setter :selected_background
     # @return [String] The foreground color of selected items.
-    attr_accessor :selected_foreground
+    attr_getter_and_setter :selected_foreground
     # @return [String] Defines a prompt to be displayed before the input area.
-    attr_accessor :prompt
+    attr_getter_and_setter :prompt
 
     def items
       @items.map! do |item|
@@ -150,6 +152,7 @@ module I3
         @selected_background = nil
         @selected_foreground = nil
         @prompt              = nil
+	yield self if block_given?
       end
     end
 

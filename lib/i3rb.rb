@@ -1,3 +1,4 @@
+require "i3rb/obj_ext"
 require "i3rb/version"
 require "i3rb/api"
 require "i3rb/config"
