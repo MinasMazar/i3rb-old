@@ -1,3 +1,5 @@
+require "i3rb/logger"
+
 module I3
   module DMenu
 

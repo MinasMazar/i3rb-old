@@ -5,11 +5,8 @@ require "i3rb/bar"
 require "i3rb/cli"
 require "i3rb/dmenu"
 require "i3rb/nagbar"
-require "logger"
+require "i3rb/logger"
 require "pry"
-
-$logger = Logger.new STDERR
-$debug = false
 
 module I3
   # Your code goes here...
