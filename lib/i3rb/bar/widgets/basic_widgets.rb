@@ -2,7 +2,7 @@
   module Bar
     module Widgets
 
-      HOSTNAME = Widget.new 'hostname', 100 do
+      HOSTNAME = Widget.new 'hostname', 0 do
         [ `whoami`.chomp, '@',  `hostname`.chomp ].join
       end
 
@@ -63,7 +63,37 @@
 	end
       end
 
+      CMUS = Widget.new 'cmus', 5 do |w|
+	w.timeout = 5
+	cmus = `cmus-remote --query` 
+	if md = cmus.match(/status\s(\w+)/)
+	  status = md[1]
+	end
+	if md = cmus.match(/tag title\s(.+)/)
+	  title = md[1]
+	end
+	if md = cmus.match(/tag artist\s(.+)/)
+	  artist = md[1]
+	end
+	if title.nil? || artist.nil? || title.empty? || artist.empty?
+	  track_desc = "No Tags :("
+	else
+	  track_desc = "#{title} - #{artist}"
+	end
+	if status == "playing"
+	  "🎜 #{track_desc} 🎜"
+	elsif status == "paused"
+	  "🎜 #{track_desc} (pause) 🎜"
+	elsif status == "stopped"
+	  "🎜 No Playing 🎜"
+	else
+	  w.timeout = 60 
+	  "🎜 CMUS inactive 🎜"
+	end
+      end
+
       BASIC = [ HOSTNAME, WIFI, BATTERY, TEMPERATURE, CALENDAR ]
+
     end
   end
 end
