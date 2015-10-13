@@ -1,4 +1,5 @@
 require "i3rb/logger"
+require "i3rb/obj_ext"
 
 module I3
   module DMenu

@@ -43,6 +43,11 @@ module I3
         stdout_attach secs
       end
 
+      def stop
+	stop_widgets
+	stdout_detach
+      end
+
       def start_widgets
         widgets.each { |w| w.run }
       end
@@ -65,6 +70,7 @@ module I3
       end
 
       def stdout_attach(sec)
+	@stdout_loop_flag = true
         begin
           @stream_out.write JSON.generate(@header) + "\n"
           sleep 0.5
@@ -72,7 +78,7 @@ module I3
           sleep 0.5
           @stream_out.write [].to_s + "\n"
           sleep 0.8
-          loop do
+          while @stdout_loop_flag do
             @stream_out.write "," + JSON.generate(widgets.map(&:to_i3bar_protocol)) + "\n"
             @stream_out.flush
             sleep sec
@@ -84,6 +90,9 @@ module I3
         end
       end
 
+      def stdout_detach
+	@stdout_loop_flag = false
+      end
       private
 
       def read_event_loop
