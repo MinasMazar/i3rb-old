@@ -101,13 +101,21 @@ module I3
           if md = l.match(/(\{.+\})/)
             begin
               @event = JSON.parse md[1]
-              notify_event! @event
-              widgets.map { |w| w.notify_event @event }
+              notify_event @event
             rescue
               nil
             end
           end
         end
+      end
+
+      def notify_event(ev)
+	super ev
+	notify_to_widgets ev
+      end
+
+      def notify_to_widgets(ev)
+	widgets.map { |w| w.notify_event ev }
       end
 
     end

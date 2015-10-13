@@ -3,4 +3,9 @@
 require 'i3rb'
 
 i3bar = I3::Bar.get_instance
-i3bar.stdout_attach 1
+i3bar.add_widgets I3::Bar::Widgets::BASIC
+i3bar.start_events_capturing
+i3bar.add_event_callback do |w,e|
+  $stderr.puts "Widget #{w} catched event #{e}"
+end
+i3bar.run 1

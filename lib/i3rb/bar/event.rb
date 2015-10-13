@@ -19,11 +19,12 @@ module I3
       end
       
       def notify_event(ev)
-        return nil unless is_receiver?(ev) && !respond_to_all?
-        notify_event! ev
+	binding.pry
+        return nil unless is_receiver?(ev) || respond_to_all_events?
+        execute_callbacks ev
       end
       
-      def notify_event!(ev)
+      def execute_callbacks(ev)
         event_callbacks.map do |cb|
           cb.call self, ev
         end
@@ -33,9 +34,8 @@ module I3
         ev["instance"] == instance
       end
       
-      def respond_to_all?
-        @options[:respond_to_all]
-      end
+      attr_accessor :respond_to_all_events
+      alias :respond_to_all_events? :respond_to_all_events
   
     end
   end

@@ -43,35 +43,32 @@ class TestBar < Minitest::Test
   end
 
   def test_i3bar_events
+    stdin = File.new(File.expand_path("../../tmp/STDIN", __FILE__))
     widget = I3::Bar::Widgets::CALENDAR
-    fake_ev = [
-      {"name" => "calendar", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9}
-    ]
-    File.write File.expand_path("../../tmp/STDIN", __FILE__), JSON.generate(fake_ev)
-
-    fin = File.new(File.expand_path("../../tmp/STDIN", __FILE__))
-    fout = File.new(File.expand_path("../../tmp/STDOUT", __FILE__), "w")
-    bar = I3::Bar.get_instance fin, fout
-
     widget.add_event_callback do |w, e|
       assert_kind_of I3::Bar::Widget, w
       assert_kind_of Hash, e
-      @callback_executed = true
+      assert e["button"] == 3, "Event is #{e.inspect}"
+      @widget_callback_executed = true
     end
-
-    bar.add_widget widget
+    fake_ev = {"name" => "calendar", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9}
+    bar = I3::Bar.get_instance stdin, $stdout do |b|
+      b.add_event_callback do |w, e|
+	assert_kind_of I3::Bar::Instance, w
+	assert_kind_of Hash, e
+	assert e["button"] == 3, "Event is #{e.inspect}"
+	@bar_callback_executed = true
+      end
+      b.add_widget widget
+      b.respond_to_all_events = true
+    end
 
     bar.start_events_capturing
     sleep 0.5
+    bar.send :notify_event, fake_ev.merge( "instance" => widget.instance)
 
-    ev = bar.event
-    assert_kind_of Hash, ev
-
-    assert ev["button"] == 3, "Event is #{ev.inspect}"
-    assert @callback_executed, "Event callback not executed"
-
-    fin.close
-    fout.close
+    assert @widget_callback_executed, "Widget callback not executed"
+    assert @bar_callback_executed, "Bar callback not executed"
   end
 
   def test_procs_for_debugging_purposes
