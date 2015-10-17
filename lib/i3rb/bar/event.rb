@@ -19,7 +19,6 @@ module I3
       end
       
       def notify_event(ev)
-	binding.pry
         return nil unless is_receiver?(ev) || respond_to_all_events?
         execute_callbacks ev
       end

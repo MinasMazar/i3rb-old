@@ -13,12 +13,12 @@ module I3
       def initialize(stream_in, stream_out, options = {})
         @stream_in, @stream_out = stream_in, stream_out
         @widgets = []
-        @header = { "version"=> 1, "stop_signal"=> 10, "cont_signal"=> 12, "click_events"=> true }
+        @header = { "version"=> 1, "click_events"=> true }
         @options = options
         [ "stop_signal", "cont_signal", "click_events"].each do |opt|
           @header[opt] = options[opt] if options.include? opt
         end
-        #@header = { "version" => 1 }
+	self.respond_to_all_events = true
         yield self if block_given?
       end
 
@@ -73,11 +73,11 @@ module I3
 	@stdout_loop_flag = true
         begin
           @stream_out.write JSON.generate(@header) + "\n"
-          sleep 0.5
+	  @stream_out.flush
           @stream_out.write "[" + "\n"
-          sleep 0.5
+          @stream_out.flush
           @stream_out.write [].to_s + "\n"
-          sleep 0.8
+	  @stream_out.flush
           while @stdout_loop_flag do
             @stream_out.write "," + JSON.generate(widgets.map(&:to_i3bar_protocol)) + "\n"
             @stream_out.flush
