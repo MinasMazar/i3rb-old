@@ -100,7 +100,7 @@ module I3
           l = @stream_in.readline.chomp
           if md = l.match(/(\{.+\})/)
             begin
-              @event = JSON.parse md[1]
+              @event = Event.new JSON.parse md[1]
               notify_event @event
             rescue
               nil

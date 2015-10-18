@@ -47,25 +47,25 @@ class TestBar < Minitest::Test
     widget = I3::Bar::Widgets::CALENDAR
     widget.add_event_callback do |w, e|
       assert_kind_of I3::Bar::Widget, w
-      assert_kind_of Hash, e
-      assert e["button"] == 3, "Event is #{e.inspect}"
+      assert_kind_of I3::Bar::EventHandler::Event, e
+      assert e.button == 3, "Event is #{e.inspect}"
       @widget_callback_executed = true
     end
-    fake_ev = {"name" => "calendar", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9}
+    fake_ev = I3::Bar::EventHandler::Event.new "name" => "calendar", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9
+    assert fake_ev.is_valid?
     bar = I3::Bar.get_instance stdin, $stdout do |b|
       b.add_event_callback do |w, e|
 	assert_kind_of I3::Bar::Instance, w
-	assert_kind_of Hash, e
-	assert e["button"] == 3, "Event is #{e.inspect}"
+	assert_kind_of I3::Bar::EventHandler::Event, e
+	assert e.button == 3, "Event is #{e.inspect}"
 	@bar_callback_executed = true
       end
       b.add_widget widget
-      b.respond_to_all_events = true
     end
 
     bar.start_events_capturing
     sleep 0.5
-    bar.send :notify_event, fake_ev.merge( "instance" => widget.instance)
+    bar.send :notify_event, fake_ev
 
     assert @widget_callback_executed, "Widget callback not executed"
     assert @bar_callback_executed, "Bar callback not executed"

@@ -2,6 +2,21 @@ module I3
   module Bar
     module EventHandler
   
+      class Event
+	PROPERTIES = [ :button, :x, :y, :instance, :name ]
+	PROPERTIES.each do |prop|
+	  attr_accessor prop
+	end
+	def initialize(hash)
+	  PROPERTIES.each do |prop|
+	    self.send "#{prop}=", hash[prop.to_s]
+	  end
+	end
+	def is_valid?
+	  !PROPERTIES.map {|p| self.send p }.include? nil
+	end
+      end
+
       def instance
         if respond_to? :name
           "#{name}-#{__id__}"
@@ -30,7 +45,7 @@ module I3
       end
       
       def is_receiver?(ev)
-        ev["instance"] == instance
+        ev.instance == instance
       end
       
       attr_accessor :respond_to_all_events
