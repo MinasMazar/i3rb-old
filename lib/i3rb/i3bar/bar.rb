@@ -1,7 +1,7 @@
 require 'json'
-require 'i3rb/bar/event'
-require 'i3rb/bar/widget'
-require 'i3rb/bar/widgets/basic_widgets'
+require 'i3rb/i3bar/event'
+require 'i3rb/i3bar/widget'
+require 'i3rb/i3bar/widgets/basic_widgets'
 
 module I3
   module Bar
@@ -110,7 +110,7 @@ module I3
     module Widgets
     end
 
-    require 'i3rb/bar/widgets/basic_widgets'
+    require 'i3rb/i3bar/widgets/basic_widgets'
 
     def self.get_instance(stream_in = nil, stream_out = nil, options = {})
       stream_in ||= $stdin

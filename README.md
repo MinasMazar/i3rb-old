@@ -1,8 +1,13 @@
 # I3rb
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/i3rb`. To experiment with that code, run `bin/console` for an interactive prompt.
+I3rb is [I3](http://i3wm.org) rubyfication.
+It consists in a collection of scripts and modules concerning most important aspects of your i3 experience.
 
-TODO: Delete this and the text above, and describe your gem
+Implemented modules:
+
++ I3 API
++ I3 BAR
++ DMENU
 
 ## Installation
 
