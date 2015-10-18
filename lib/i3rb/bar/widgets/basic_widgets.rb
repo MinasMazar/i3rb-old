@@ -2,15 +2,15 @@
   module Bar
     module Widgets
 
-      HOSTNAME = Widget.new 'hostname', 0 do
+      HOSTNAME = Widget.new :hostname, 0 do
         [ `whoami`.chomp, '@',  `hostname`.chomp ].join
       end
 
-      CALENDAR = Widget.new 'calendar', 1 do
+      CALENDAR = Widget.new :calendar, 1 do
         Time.new.strftime('%d-%m-%Y %H:%M:%S')
       end
 
-      WIFI = Widget.new 'wifi', 10 do |w|
+      WIFI = Widget.new :wifi, 10 do |w|
         iwc_out = `iwconfig 2>/dev/null`.gsub("\n", " ")
         out = "WiFi: "
         if md = iwc_out.match(/ESSID:"(.+)"/)
@@ -28,7 +28,7 @@
         out
       end
 
-      TEMPERATURE = Widget.new 'temp', 15 do |w|
+      TEMPERATURE = Widget.new :temp, 15 do |w|
         w.kill unless `sensors`.gsub("\n", " ").match(/acpitz/)
         out = "Temp: "
         if md = `sensors`.gsub("\n", " ").match(/temp1:\s+(\S+)°C\s+\(crit\s+=\s+(\S+)°C\)/)
@@ -44,7 +44,7 @@
         out
       end
 
-      BATTERY = Widget.new 'battery', 60 do |w|
+      BATTERY = Widget.new :battery, 60 do |w|
 	acpi_res = `acpi -b`
 	if md = acpi_res.match(/Battery\s(\d+):\s(\w+),\s(\d+)%/)
 	  status = md[2]
@@ -63,7 +63,7 @@
 	end
       end
 
-      CMUS = Widget.new 'cmus', 5 do |w|
+      CMUS = Widget.new :cmus, 5 do |w|
 	w.timeout = 5
 	cmus = `cmus-remote --query` 
 	if md = cmus.match(/status\s(\w+)/)
@@ -92,7 +92,46 @@
 	end
       end
 
-      BASIC = [ HOSTNAME, WIFI, BATTERY, TEMPERATURE, CALENDAR ]
+      CMUS.add_event_callback do |w,e|
+	if e.button == 1
+	  system "cmus-remote", "--pause"
+	elsif e.button == 3
+	  system "cmus-remote", "--next"
+	end
+      end
+
+      BASIC = [ HOSTNAME, CMUS, WIFI, BATTERY, TEMPERATURE, CALENDAR ]
+
+      BASIC.each do |widget|
+	define_method widget.name do
+	  w = widget widget.name
+	  return w if w
+	  add_widget widget
+	  return widget
+	end
+      end
+
+      def add_basic_widgets
+	add_widgets BASIC
+      end
+
+      def add_widget(widget)
+        @widgets << widget
+      end
+
+      alias :add_widgets :add_widget
+
+      def widget(w)
+        widgets.find { |_w| _w.name == w }
+      end
+
+      def widgets
+	@widgets.flatten!
+	@widgets.reject! {|w| !w.kind_of? Widget }
+	@widgets.sort_by! {|w| w.pos }
+	@widgets.uniq!
+	@widgets
+      end
 
     end
   end

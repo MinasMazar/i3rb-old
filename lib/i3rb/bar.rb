@@ -1,12 +1,14 @@
 require 'json'
 require 'i3rb/bar/event'
 require 'i3rb/bar/widget'
+require 'i3rb/bar/widgets/basic_widgets'
 
 module I3
   module Bar
     class Instance
 
       include EventHandler
+      include Widgets
 
       attr_reader :options
 
@@ -20,22 +22,6 @@ module I3
         end
 	self.respond_to_all_events = true
         yield self if block_given?
-      end
-
-      def add_widget(widget)
-        @widgets << widget
-      end
-
-      alias :add_widgets :add_widget
-
-      def widget(w)
-        widgets.find { |_w| _w.name == w }
-      end
-
-      def widgets
-	@widgets.flatten!
-	@widgets.reject! {|w| !w.kind_of? Widget }
-	@widgets
       end
 
       def run(secs)
@@ -93,6 +79,7 @@ module I3
       def stdout_detach
 	@stdout_loop_flag = false
       end
+
       private
 
       def read_event_loop

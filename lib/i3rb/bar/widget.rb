@@ -15,7 +15,7 @@ module I3
         @color = @options[:color] if @options[:color]
         @pos = @options[:pos] if @options[:pos]
         @timeout = timeout.to_i.abs
-        @proc = proc
+        @block = proc
       end
 
       def pos
@@ -29,11 +29,21 @@ module I3
       def run
         @run_th = Thread.new do
           loop do
-            @text = @proc.call self
+            block_eval!
             break if @timeout <= 0
             sleep @timeout.to_i
           end
         end
+      end
+
+      def block_eval!
+	ret = @block.call self
+	@text = ret if ret.kind_of? String
+      end
+
+      def notify_event(ev)
+	super ev
+	block_eval!
       end
 
       def to_i3bar_protocol
@@ -44,6 +54,14 @@ module I3
         h.merge! "name" => name
         h.merge! "instance" => instance
         h
+      end
+
+      def ==(w)
+	self.instance == w.instance
+      end
+
+      def to_s
+	"#{instance}"
       end
 
     end

@@ -15,6 +15,9 @@ module I3
 	def is_valid?
 	  !PROPERTIES.map {|p| self.send p }.include? nil
 	end
+	def to_s
+	  "Event from #{instance}: button #{button}"
+	end
       end
 
       def instance
