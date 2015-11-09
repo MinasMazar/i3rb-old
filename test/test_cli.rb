@@ -3,11 +3,7 @@ require 'pry'
 
 class TestCLI < Minitest::Test
 
-  class CLIDriver
-    include I3::CLI
-  end
-
-  @@driver = CLIDriver.new
+  @@driver = I3::CLI.get_instance
 
   def test_goto_workspace_69
     @@driver.run ["goto_workspace", "69"]
@@ -25,4 +21,9 @@ class TestCLI < Minitest::Test
   def test_goto_workspace_dmenu
     @@driver.run ["goto_workspace", "_dmenu_"]
   end
+
+  def test_goto_workspace_dmenu_with_items
+    @@driver.run ["goto_workspace", "_dmenu_ws_"]
+  end
+
 end

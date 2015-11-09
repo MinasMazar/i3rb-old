@@ -4,22 +4,12 @@ require 'i3rb/dmenu'
 module I3
   module CLI
 
-    module Macros
-
-      def get_workspaces
-        super.map { |ws| ws["name"] }
-      end
-
-      def move_and_goto_workspace(ws)
-        move_to_workspace ws
-        goto_workspace ws
-      end
-
-    end
-
     include I3::API
     include I3::DMenu
-    include I3::CLI::Macros
+
+    def self.get_instance
+      Object.new.extend self
+    end
 
     def run(args)
       dmenu = DMenu.get_instance
@@ -27,7 +17,7 @@ module I3
         if arg == "_stdin_"
           $stdin.readline.chomp
         elsif arg == "_dmenu_ws_"
-          dmenu.items.concat get_workspaces
+          dmenu.items.concat get_workspaces.map {|w| w["name"] }
           dmenu.get_string
         elsif arg == "_dmenu_"
           dmenu.get_string
@@ -37,10 +27,6 @@ module I3
       end
       
       #$debug = true
-      
-      driver = Object.new
-      driver.extend I3::API
-      driver.extend I3::CLI::Macros
       
       args.join(" ").split(",").each do |cmd|
         cmd = cmd.split
