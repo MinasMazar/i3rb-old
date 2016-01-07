@@ -15,16 +15,19 @@ class TestBar < Minitest::Test
 
   def test_widgets_pushing
     i3bar = I3::Bar.get_instance
-    i3bar.add_widget I3::Bar::Widgets::HOSTNAME
-    i3bar.add_widgets [ I3::Bar::Widgets::CALENDAR, I3::Bar::Widgets::WIFI ]
-    i3bar.add_widget I3::Bar::Widgets::TEMPERATURE
-    i3bar.add_widget I3::Bar::Widgets::TEMPERATURE
-    i3bar.add_widget "This is not a Widget instance"
+    i3bar.add_widget I3::Bar::Widgets::Hostname.get_instance
+    i3bar.add_widgets [ I3::Bar::Widgets::Calendar.get_instance, I3::Bar::Widgets::WiFi.get_instance ]
+    i3bar.add_widget I3::Bar::Widgets::Temperature.get_instance
+    i3bar.add_widget I3::Bar::Widgets::Temperature.get_instance
+    assert_raises ArgumentError do
+      i3bar.add_widget "This is not a Widget instance"
+    end
     assert_equal 4, i3bar.widgets.size
   end
 
   def test_widgets_modular_init
     i3bar = I3::Bar.get_instance do |b|
+      b.add_basic_widgets
       b.hostname.color = "#00FF00"
       b.hostname do
 	"@darkstar"
@@ -46,18 +49,18 @@ class TestBar < Minitest::Test
 
   def test_i3bar_running
     i3bar = I3::Bar.get_instance
-    i3bar.add_widget I3::Bar::Widgets::BASIC
+    i3bar.add_basic_widgets
     Thread.new { sleep 2; i3bar.stop }
     i3bar.run 1
   end
 
   def test_single_widget_once
     bar = I3::Bar.get_instance
-    widget = I3::Bar::Widgets::TEMPERATURE
+    widget = I3::Bar::Widgets::Temperature.get_instance
     widget.timeout = 0
     pre_add_id = widget.__id__
     bar.add_widget widget
-    widget = bar.widget :temp
+    widget = bar.widget :temperature
     post_add_id = widget.__id__
     bar.start_widgets
     widget.instance_variable_get(:@run_th).join
@@ -66,7 +69,7 @@ class TestBar < Minitest::Test
 
   def test_i3bar_events
     stdin = File.new(File.expand_path("../../tmp/STDIN", __FILE__))
-    widget = I3::Bar::Widgets::CALENDAR
+    widget = I3::Bar::Widgets::Calendar.get_instance
     widget.add_event_callback do |w, e|
       assert_kind_of I3::Bar::Widget, w
       assert_kind_of I3::Bar::EventHandler::Event, e
@@ -95,6 +98,7 @@ class TestBar < Minitest::Test
 
   def test_procs_for_debugging_purposes
     I3::Bar::Widgets::BASIC.each do |w|
+      w = w.get_instance
       p = w.instance_variable_get "@block"
       assert_kind_of String, p.call(w)
     end
