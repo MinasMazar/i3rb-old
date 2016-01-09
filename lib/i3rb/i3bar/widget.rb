@@ -2,6 +2,8 @@ module I3
   module Bar
     class Widget
 
+      LOG_FILE = "~/.i3/widgets.log"
+
       include EventHandler
 
       attr_accessor :name, :text, :timeout, :block
@@ -64,6 +66,17 @@ module I3
 	"#{instance}"
       end
 
+      def self.system_exec(*cmdline)
+        begin
+          $logger.debug "Widget::system_exec(\"#{cmdline.join(' ')} >> #{LOG_FILE}\""
+          system "#{cmdline.join(' ')} >> #{LOG_FILE}"
+        rescue Exception => e
+          $logger.debug"Exception catched: #{e}"
+        end
+      end
+      def system_exec(*cmdline)
+        Widget.system_exec *cmdline
+      end
     end
   end
 end

@@ -68,29 +68,39 @@ class TestBar < Minitest::Test
   end
 
   def test_i3bar_events
+    @widget_callback_executed = false
     stdin = File.new(File.expand_path("../../tmp/STDIN", __FILE__))
     widget = I3::Bar::Widgets::Calendar.get_instance
     widget.add_event_callback do |w, e|
       assert_kind_of I3::Bar::Widget, w
       assert_kind_of I3::Bar::EventHandler::Event, e
-      assert e.button == 3, "Event is #{e.inspect}"
+      assert e.button == 3, "Expected button 3 but was given #{e.inspect}" if w.is_receiver?(e)
       @widget_callback_executed = true
     end
+    mpd_widget = I3::Bar::Widgets::MPD.new("no-host", 10)
+    mpd_widget.reset_callbacks
+    mpd_widget.add_event_callback do |w,e|
+      assert e.button == 1, "Expected button 1 but was given #{e.inspect}" if w.is_receiver?(e)
+      w.system_exec "echo", ("*" * 9)
+    end
     fake_ev = I3::Bar::EventHandler::Event.new "name" => "calendar", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9
+    mpd_fake_ev = I3::Bar::EventHandler::Event.new "name" => "calendar", "instance" => mpd_widget.instance, "button" => 1, "x" => 1288, "y" => 11
     assert fake_ev.is_valid?
     bar = I3::Bar.get_instance stdin, $stdout do |b|
       b.add_event_callback do |w, e|
 	assert_kind_of I3::Bar::Instance, w
 	assert_kind_of I3::Bar::EventHandler::Event, e
-	assert e.button == 3, "Event is #{e.inspect}"
+	assert e.button == 2, "Expected button 2 but was given #{e.inspect}" if w.is_receiver?(e)
 	@bar_callback_executed = true
       end
       b.add_widget widget
+      b.add_widget mpd_widget
     end
 
     bar.start_events_capturing
     sleep 0.5
     bar.send :notify_event, fake_ev
+    bar.send :notify_event, mpd_fake_ev
 
     assert @widget_callback_executed, "Widget callback not executed"
     assert @bar_callback_executed, "Bar callback not executed"
