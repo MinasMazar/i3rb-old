@@ -17,7 +17,8 @@ module I3
         @color = @options[:color] if @options[:color]
         @pos = @options[:pos] if @options[:pos]
         @timeout = timeout.to_i.abs
-        @block = proc
+        @suspended_events = false
+        @block = proc || lambda {}
       end
 
       def pos
@@ -38,12 +39,25 @@ module I3
         end
       end
 
+      def suspend_events(secs = 0)
+        @suspended_events = true
+        if secs > 0
+          @suspend_th = Thread.new do
+            sleep secs
+            @suspended_events = false
+          end
+        end
+      end
+
       def block_eval!
 	ret = @block.call self
 	@text = ret if ret.kind_of? String
       end
 
+      alias :refresh! :block_eval!
+
       def notify_event(ev)
+        return nil if @suspended_events
 	super ev
 	block_eval!
       end

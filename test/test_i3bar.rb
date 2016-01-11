@@ -81,7 +81,6 @@ class TestBar < Minitest::Test
     mpd_widget.reset_callbacks
     mpd_widget.add_event_callback do |w,e|
       assert e.button == 1, "Expected button 1 but was given #{e.inspect}" if w.is_receiver?(e)
-      w.system_exec "echo", ("*" * 9)
     end
     fake_ev = I3::Bar::EventHandler::Event.new "name" => "calendar", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9
     mpd_fake_ev = I3::Bar::EventHandler::Event.new "name" => "calendar", "instance" => mpd_widget.instance, "button" => 1, "x" => 1288, "y" => 11
@@ -104,6 +103,25 @@ class TestBar < Minitest::Test
 
     assert @widget_callback_executed, "Widget callback not executed"
     assert @bar_callback_executed, "Bar callback not executed"
+  end
+
+  def test_suspend_widget
+    @suspend_widget_received_event = false
+    widget = I3::Bar::Widget.new :suspend_widget, 5 do
+    end
+    widget.add_event_callback do |w, e|
+      @suspend_widget_received_event = true
+    end
+    fake_ev = I3::Bar::EventHandler::Event.new "name" => "suspend_widget", "instance" => widget.instance, "button" => 3, "x" => 1297, "y" => 9
+    widget.notify_event fake_ev
+    assert @suspend_widget_received_event
+    @suspend_widget_received_event = false
+    widget.suspend_events 0.3
+    widget.notify_event fake_ev
+    refute @suspend_widget_received_event
+    sleep 1
+    widget.notify_event fake_ev
+    assert @suspend_widget_received_event
   end
 
   def test_procs_for_debugging_purposes
