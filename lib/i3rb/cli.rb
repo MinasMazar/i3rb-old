@@ -5,14 +5,13 @@ module I3
   module CLI
 
     include I3::API
-    include I3::DMenu
 
     def self.get_instance
       Object.new.extend self
     end
 
     def run(args)
-      dmenu = DMenu.get_instance
+      dmenu = DMenu.new
       args.map! do |arg|
         if arg == "_stdin_"
           $stdin.readline.chomp

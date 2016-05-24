@@ -2,7 +2,7 @@ require "i3rb/logger"
 require "i3rb/obj_ext"
 
 module I3
-  module DMenu
+  class DMenu
 
     class Item
       # @return [#to_s] The key is what will be displayed in the menu.
@@ -80,7 +80,7 @@ module I3
     end
 
     def run__sys_call_impl
-      i = items.map {|i| "#{i.key.to_s}" } 
+      i = items.map {|i| "#{i.key.to_s}" }
       cmd = "echo -n \"#{i.join "\n"}\" | #{command.join " "} "
       value = `#{cmd}`
       $logger.debug  "Systemcall: #{cmd} => #{value}"
@@ -104,23 +104,23 @@ module I3
     end
 
     private
-  
+
     def command
       args = ["dmenu"]
-  
+
       if @position == :bottom
         args << "-b"
       end
-  
+
       if @case_insensitive
         args << "-i"
       end
-  
+
       if @lines > 1
         args << "-l"
         args << lines.to_s
       end
-  
+
       h = {
         "fn" => @font,
         "nb" => @background,
@@ -129,45 +129,35 @@ module I3
         "sf" => @selected_foreground,
         "p"  => @prompt,
       }
-  
+
       h.each do |flag, value|
         if value
           args << "-#{flag}"
           args << value
         end
       end
-  
+
       return args
     end
-      
-    class Instance
-      include DMenu
-      def initialize
-        @items               = []
-        @position            = :top
-        @case_insensitive    = false
-        @lines               = 1
-        @font                = nil
-        @background          = nil
-        @foreground          = nil
-        @selected_background = nil
-        @selected_foreground = nil
-        @prompt              = nil
-	instance_eval &Proc.new if block_given?
-      end
-    end
 
-    def self.get_instance
+    def initialize(args = {})
+      @items               = []
+      @position            = :top
+      @case_insensitive    = false
+      @lines               = 1
+      @font                = nil
+      @background          = nil
+      @foreground          = nil
+      @selected_background = nil
+      @selected_foreground = nil
+      @prompt              = nil
+      args.each do |a, v|
+        self.send "set_#{a}", v
+      end
       if block_given?
-	Instance.new &Proc.new
-      else
-	Instance.new 
+         instance_eval &Proc.new
       end
     end
 
-    def self.get_choice(&block)
-      dmenu = get_instance &block
-      dmenu.run.value
-    end
   end
 end
