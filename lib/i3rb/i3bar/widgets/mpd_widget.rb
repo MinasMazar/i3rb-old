@@ -15,9 +15,9 @@ module I3
             if ret.size > 1
               track = ret[0]
               status = ret[1].split[0]
-              "🎜 #{track} #{status} 🎜"
+              " #{track} #{status} "
             else
-              "🎜 MPD not running 🎜"
+              " MPD not running "
             end
           end
           add_event_callback do |w,e|
