@@ -4,11 +4,13 @@ module I3
 
       class Calendar < Widget
         def self.get_instance
-          new 1
+          new '%d-%m-%Y %H:%M:%S', 1
         end
-        def initialize(timeout)
+        attr_accessor :format
+        def initialize(format, timeout)
+          @format = format
           super :calendar, timeout do
-            Time.new.strftime('%d-%m-%Y %H:%M:%S')
+            Time.new.strftime(format)
           end
         end
       end
