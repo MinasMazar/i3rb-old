@@ -27,7 +27,10 @@ module I3
           end
         end
         def mpc_command(cmd)
-          "mpc -h #{host} #{cmd}"
+          mpc_cmd = [ "mpc" ]
+          mpc_cmd << "-h #{host}" if host
+          mpc_cmd << cmd
+          mpc_cmd.join " "
         end
         def exec_mpc_command(cmd)
           system_exec mpc_command cmd
