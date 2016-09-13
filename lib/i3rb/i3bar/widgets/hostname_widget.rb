@@ -8,7 +8,7 @@ module I3
         end
         def initialize
           super :hostname, 0 do
-            `hostname`.chomp
+            [ `hostname`.chomp ] * 2
           end
         end
       end

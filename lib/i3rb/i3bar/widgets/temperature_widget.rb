@@ -21,7 +21,7 @@ module I3
               out += "NONE"
               w.color = "#FF0000"
             end
-            out
+            [ out ] * 2
           end
         end
       end

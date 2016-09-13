@@ -6,12 +6,13 @@ module I3
 
       include EventHandler
 
-      attr_accessor :name, :text, :timeout, :block
+      attr_accessor :name, :text, :short_text, :timeout, :block
       attr_accessor :pos, :color
 
       def initialize(name, timeout = 0, options = {}, &proc)
         @name = name
         @text = name
+        @short_text = text
         @active = true
         @options = options
         @color = @options[:color] if @options[:color]
@@ -50,22 +51,28 @@ module I3
       end
 
       def block_eval!
-	ret = @block.call self
-	@text = ret if ret.kind_of? String
+	      ret = @block.call self
+        if ret.kind_of? String
+          self.text = ret
+        elsif ret.kind_of?(Array) && ret.size == 2
+          self.text = ret[0]
+          self.short_text = ret[1]
+        end
       end
 
       alias :refresh! :block_eval!
 
       def notify_event(ev)
         return nil if @suspended_events
-	super ev
-	block_eval!
+	      super ev
+	      block_eval!
       end
 
       def to_i3bar_protocol
         h = {
-          "full_text" => @text
+          "full_text" => text
         }
+        h.merge! "short_text" => short_text
         h.merge! "color" => self.color if @color
         h.merge! "name" => name
         h.merge! "instance" => instance
@@ -73,11 +80,11 @@ module I3
       end
 
       def ==(w)
-	self.instance == w.instance
+	      self.instance == w.instance
       end
 
       def to_s
-	"#{instance}"
+	      "#{instance}"
       end
 
       def self.system_exec(*cmdline)

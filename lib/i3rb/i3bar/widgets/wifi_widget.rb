@@ -18,11 +18,11 @@ module I3
                 signal_percent = signal * 100 / range
                 out += " (#{signal_percent}%) "
               end
+              [ out, "WiFi: ON" ]
             else
               out += "down "
               w.color = "#FF0000"
             end
-            out
           end
         end
       end

@@ -10,7 +10,7 @@ module I3
         def initialize(format, timeout)
           @format = format
           super :calendar, timeout do
-            Time.new.strftime(format)
+            [ Time.new.strftime(format), Time.new.strftime("%H:%M") ]
           end
         end
       end

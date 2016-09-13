@@ -19,7 +19,7 @@ module I3
 	      else
 	        w.color = "#FF0000"
 	      end
-	      "BATTERY: #{charging_percentage}% #{status}"
+	      [ "BATTERY: #{charging_percentage}% #{status}" ] * 2
 	    else
 	      w.kill
 	      false
