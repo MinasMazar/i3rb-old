@@ -8,7 +8,8 @@ module I3
         end
         def initialize(timeout)
           super :wifi, timeout do |w|
-            iwc_out = `iwconfig 2>/dev/null`.gsub("\n", " ")
+            iwc_out = block_given? ? yield : `iwconfig 2>/dev/null`
+            iwc_out = iwc_out.gsub("\n", " ")
             out = "WiFi: "
             if md = iwc_out.match(/ESSID:"(.+)"/)
               w.color = "#00FF00"
@@ -20,8 +21,8 @@ module I3
               end
               [ out, "WiFi: ON" ]
             else
-              out += "down "
               w.color = "#FF0000"
+              out += "down "
             end
           end
         end
