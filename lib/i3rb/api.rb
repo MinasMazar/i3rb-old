@@ -11,7 +11,7 @@ module I3
         system_i3msg "-t #{meth}"
       end
     end
-  
+
     def current_workspace
       ws = get_workspaces.find {|w| w["focused"]}
       ws.extend Workspace
@@ -63,14 +63,14 @@ module I3
 
     attr_reader :connection
 
-    protected
+    private
 
     def system_i3msg(*msg)
       msg = msg.join(", ")
       ret = JSON.parse `i3-msg #{msg}`
       $logger.debug "system:i3-msg < #{msg} > => #{ret}" if $debug
       return yield(ret) if block_given?
-      raise CommandError.new if ret && ret.any? && ret[0]["success"] == false
+      raise CommandError.new if ret && ret.is_a?(Hash) && ret.any? && ret["success"] == false
       ret
     end
 
@@ -79,12 +79,12 @@ module I3
       command = [ "i3-msg" ] + msg
       pipe = IO.popen(command, "w+")
       ret = pipe.read
-      $logger.debug "system:i3pipe < #{msg} > => #{ret}" if $debug 
+      $logger.debug "system:i3pipe < #{msg} > => #{ret}" if $debug
       raise CommandError.new ret[0]["error"] if ret && ret.any? && ret[0]["success"] == false
       pipe.close
       JSON.parse ret.chomp
     end
-      
+
     def connection
       @connection ||= reset_connection!
     end

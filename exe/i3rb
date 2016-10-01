@@ -4,6 +4,8 @@ require 'i3rb'
 require 'thor'
 require 'pry'
 
+$debug = true
+
 class I3::CLI < Thor
 
   include I3::API
