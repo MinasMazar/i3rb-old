@@ -27,6 +27,8 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "i3ipc"
+  spec.add_dependency "thor"
+  spec.add_dependency "pry"
 
   spec.add_development_dependency "minitest"
   spec.add_development_dependency "pry"

@@ -1,16 +1,18 @@
 #!/bin/ruby
 
 require 'i3rb'
+require 'thor'
+require 'pry'
 
-ARGV.map! do |arg|
-  if arg == "_stdin_"
-    $stdin.readline.chomp
-  else
-    arg
+class I3::CLI < Thor
+
+  include I3::API
+
+  desc "pry", "Start pry session within i3 ipc connection"
+  def pry
+    binding.pry
   end
+
 end
 
-#$debug = true
-
-driver = Object.new.extend I3::CLI
-driver.run ARGV
+I3::CLI.start ARGV
