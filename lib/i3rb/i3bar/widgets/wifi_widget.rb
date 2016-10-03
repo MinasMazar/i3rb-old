@@ -19,6 +19,15 @@ module I3
                 signal_percent = signal * 100 / range
                 out += " (#{signal_percent}%) "
               end
+              signal_color = {
+                (1..20) => "#FF0000",
+                (21..40) => "#FFFF00",
+                (41..60) => "#8ae429",
+                (61..80) => "#00EE00",
+                (81..100) => "#00FF00"
+              }
+              signal_color = signal_color.map { |range,color| range.include?(signal_percent) ? color : nil }.compact.first
+              w.color = signal_color
               [ out, "WiFi: ON" ]
             else
               w.color = "#FF0000"
