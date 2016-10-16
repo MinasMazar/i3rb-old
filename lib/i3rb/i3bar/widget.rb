@@ -17,6 +17,12 @@ module I3
         @options = options
         @color = @options[:color] if @options[:color]
         @pos = @options[:pos] if @options[:pos]
+        if @options[:events]
+          @options[:events] = [ @options[:events] ] unless @options[:events].is_a? Array
+          @options[:events].each do |ev|
+            add_event_callback ev
+          end
+        end
         @timeout = timeout.to_i.abs
         @suspended_events = false
         @block = proc || lambda {}
