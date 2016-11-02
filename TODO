@@ -1,1 +1,11 @@
-Submodule for rmenu instead of dmenu.rb
+
+
+* TODO Config file compilation mechanism
+
+ Can compile a bunch of ruby data/objects into a i3 parsable config file
+
+* TODO Include *rmenu* gem
+ Pre
+ - [ ] rmenu is stable (merge branch origin/rmenu)
+ - [ ] config file compilation mechanism is ready
+ 
