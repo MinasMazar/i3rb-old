@@ -3,9 +3,9 @@ require "i3rb/version"
 require "i3rb/api"
 require "i3rb/config"
 require "i3rb/i3bar/bar"
-require "i3rb/dmenu"
 require "i3rb/nagbar"
 require "i3rb/logger"
+require "rmenu"
 require "pry"
 
 module I3
