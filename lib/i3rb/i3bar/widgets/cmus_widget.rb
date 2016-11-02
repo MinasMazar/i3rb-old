@@ -11,36 +11,36 @@ module I3
           super :cmus, timeout do |w|
 	          cmus = `cmus-remote --query`
 	          if md = cmus.match(/status\s(\w+)/)
-	            status = md[1]
+             status = md[1]
 	          end
 	          if md = cmus.match(/tag title\s(.+)/)
-	            title = md[1]
+             title = md[1]
 	          end
 	          if md = cmus.match(/tag artist\s(.+)/)
-	            artist = md[1]
+             artist = md[1]
 	          end
 	          if title.nil? || artist.nil? || title.empty? || artist.empty?
-	            track_desc = "No Tags :("
+             track_desc = "No Tags :("
 	          else
-	            track_desc = "#{title} - #{artist}"
+             track_desc = "#{title} - #{artist}"
 	          end
 	          if status == "playing"
-	            "#{track_desc} |>"
+             "#{track_desc} |>"
 	          elsif status == "paused"
-	            "#{track_desc} ||"
+             "#{track_desc} ||"
 	          elsif status == "stopped"
-	            "No Playing"
+             "No Playing"
 	          else
-	            w.timeout = 60
-	            "CMUS inactive"
+             w.timeout = 60
+             "CMUS inactive"
 	          end
           end
 
           add_event_callback do |w,e|
 	          if e.button == 1
-	            system "cmus-remote", "--pause"
+             system "cmus-remote", "--pause"
 	          elsif e.button == 3
-	            system "cmus-remote", "--next"
+             system "cmus-remote", "--next"
 	          end
           end
         end
