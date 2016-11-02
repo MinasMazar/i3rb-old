@@ -10,8 +10,11 @@ class I3::CLI < Thor
 
   include I3::API
 
-  desc "pry", "Start pry session within i3 ipc connection"
-  def pry
+  desc "pry [script]", "Start pry session within i3 ipc connection, eventually pre-load a script"
+  def pry(script = nil)
+    if script && File.exist?(script)
+      load script
+    end
     binding.pry
   end
 
