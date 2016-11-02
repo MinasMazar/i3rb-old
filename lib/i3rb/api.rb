@@ -68,7 +68,7 @@ module I3
     def system_i3msg(*msg)
       msg = msg.join(", ")
       ret = JSON.parse `i3-msg #{msg}`
-      $logger.debug "system:i3-msg < #{msg} > => #{ret}" if $debug
+      $logger.debug "#{self.class}#i3-msg < #{msg} > => #{ret}" if $debug
       return yield(ret) if block_given?
       raise CommandError.new if ret && ret.is_a?(Hash) && ret.any? && ret["success"] == false
       ret
@@ -79,7 +79,7 @@ module I3
       command = [ "i3-msg" ] + msg
       pipe = IO.popen(command, "w+")
       ret = pipe.read
-      $logger.debug "system:i3pipe < #{msg} > => #{ret}" if $debug
+      $logger.debug "#{self.class}#i3pipe < #{msg} > => #{ret}" if $debug
       raise CommandError.new ret[0]["error"] if ret && ret.any? && ret[0]["success"] == false
       pipe.close
       JSON.parse ret.chomp
@@ -96,7 +96,7 @@ module I3
     def i3ipc(*msg)
       msg = msg.join(", ")
       ret = connection.command msg
-      $logger.debug "system:i3-ipc < #{msg} > => #{ret}" if $debug
+      $logger.debug "#{self.class}#i3-ipc < #{msg} > => #{ret}" if $debug
       return yield(ret) if block_given?
       if ret[0].success?
         ret[0].to_h
