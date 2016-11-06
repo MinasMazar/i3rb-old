@@ -11,7 +11,7 @@ module I3
         def initialize(host, timeout)
           @host = host
           super :mpd, timeout do |w|
-            ret = `mpc -h #{host}`.split("\n")
+            ret = system_exec_and_get_output "mpc -h #{host}".split("\n")
             if ret.size > 1
               track = ret[0]
               status = ret[1].split[0]

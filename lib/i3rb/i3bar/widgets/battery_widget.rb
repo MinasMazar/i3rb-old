@@ -8,7 +8,7 @@ module I3
         end
         def initialize(timeout)
           super :battery, timeout do |w|
-            acpi_res = `acpi -b`
+            acpi_res = system_exec_and_get_output "acpi -b"
             if md = acpi_res.match(/Battery\s(\d+):\s(\w+),\s(\d+)%/)
               status = md[2]
               charging_percentage = md[3].to_i
@@ -22,7 +22,7 @@ module I3
               [ "BATTERY: #{charging_percentage}% #{status}" ] * 2
             else
               w.kill
-              false
+              "BATTERY: [#{acpi_res}]"
             end
           end
         end

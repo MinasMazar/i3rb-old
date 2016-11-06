@@ -44,7 +44,7 @@ class TestBar < Minitest::Test
       bar.add_basic_widgets
       bar.hostname.color = "#FFFFFF"
     end
-    assert_equal i3bar.widgets.size, I3::Bar::Widgets::BASIC.size
+    assert_equal i3bar.widgets.size, I3::Bar::Widgets::ALL.size
   end
 
   def test_i3bar_running
@@ -108,6 +108,7 @@ class TestBar < Minitest::Test
   def test_suspend_widget
     @suspend_widget_received_event = false
     widget = I3::Bar::Widget.new :suspend_widget, 5 do
+      ""
     end
     widget.add_event_callback do |w, e|
       @suspend_widget_received_event = true
@@ -125,10 +126,12 @@ class TestBar < Minitest::Test
   end
 
   def test_procs_for_debugging_purposes
-    I3::Bar::Widgets::BASIC.each do |w|
+    I3::Bar::Widgets::ALL.each do |w|
       w = w.get_instance
       p = w.instance_variable_get "@block"
-      assert_kind_of String, p.call(w)
+      result = w.refresh!
+      assert_instance_of Proc, p
+      assert [ String, Array].include?(result.class), "Widget #{w.class} returned an instance of #{result.class}"
     end
   end
 

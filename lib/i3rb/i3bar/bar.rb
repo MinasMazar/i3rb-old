@@ -20,7 +20,7 @@ module I3
         [ "stop_signal", "cont_signal", "click_events"].each do |opt|
           @header[opt] = options[opt] if options.include? opt
         end
-	self.respond_to_all_events = true
+        self.respond_to_all_events = true
         yield self if block_given?
       end
 
@@ -30,8 +30,8 @@ module I3
       end
 
       def stop
-	stop_widgets
-	stdout_detach
+        stop_widgets
+        stdout_detach
       end
 
       def start_widgets
@@ -56,14 +56,14 @@ module I3
       end
 
       def stdout_attach(sec)
-	@stdout_loop_flag = true
+        @stdout_loop_flag = true
         begin
           @stream_out.write JSON.generate(@header) + "\n"
-	  @stream_out.flush
+          @stream_out.flush
           @stream_out.write "[" + "\n"
           @stream_out.flush
           @stream_out.write [].to_s + "\n"
-	  @stream_out.flush
+          @stream_out.flush
           while @stdout_loop_flag do
             @stream_out.write "," + JSON.generate(widgets.map(&:to_i3bar_protocol)) + "\n"
             @stream_out.flush
@@ -77,7 +77,7 @@ module I3
       end
 
       def stdout_detach
-	@stdout_loop_flag = false
+        @stdout_loop_flag = false
       end
 
       private
@@ -97,12 +97,12 @@ module I3
       end
 
       def notify_event(ev)
-	super ev
-	notify_to_widgets ev
+        super ev
+        notify_to_widgets ev
       end
 
       def notify_to_widgets(ev)
-	widgets.map { |w| w.notify_event ev }
+        widgets.map { |w| w.notify_event ev }
       end
 
     end

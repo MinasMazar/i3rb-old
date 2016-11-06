@@ -39,7 +39,7 @@ module I3
       def run
         @run_th = Thread.new do
           loop do
-            block_eval!
+            eval!
             break if @timeout <= 0
             sleep @timeout.to_i
           end
@@ -56,22 +56,31 @@ module I3
         end
       end
 
-      def block_eval!
+      def eval!
 	      ret = @block.call self
         if ret.kind_of? String
           self.text = ret
-        elsif ret.kind_of?(Array) && ret.size == 2
-          self.text = ret[0]
-          self.short_text = ret[1]
+        elsif ret.kind_of?(Array)
+          if ret.size == 2
+            self.text = ret[0]
+            self.short_text = ret[1]
+          elsif ret.size == 1
+            self.text = ret[0]
+            self.short_text = ""
+          else
+            raise "#{block.inspect} eval returned nor String nor [n1,n2]"
+          end
+        else
+          raise "#{block.inspect} eval returned nor String nor [n1,n2], but #{ret.inspect}"
         end
       end
 
-      alias :refresh! :block_eval!
+      alias :refresh! :eval!
 
       def notify_event(ev)
         return nil if @suspended_events
 	      super ev
-	      block_eval!
+	      eval!
       end
 
       def to_i3bar_protocol
@@ -95,12 +104,23 @@ module I3
 
       def self.system_exec(*cmdline)
         begin
-          $logger.debug "Widget::system_exec(\"#{cmdline.join(' ')} >> #{LOG_FILE}\""
-          system "#{cmdline.join(' ')} >> #{LOG_FILE}"
+          $logger.debug "Widget::system_exec(\"#{cmdline.join(' ')} >> #{LOG_FILE}\")"
+          system cmdline << ">>" << "#{LOG_FILE}"
         rescue Exception => e
           $logger.debug"Exception catched: #{e}"
         end
       end
+
+      def system_exec_and_get_output(*cmdline)
+        begin
+          $logger.debug "Widget::system_exec(\"#{cmdline.join(' ')} >> #{LOG_FILE}\")"
+          return `#{cmdline.join(' ')}`
+        rescue Exception => e
+          $logger.debug"Exception catched: #{e}"
+          e.class.to_s
+        end
+      end
+
       def system_exec(*cmdline)
         Widget.system_exec *cmdline
       end

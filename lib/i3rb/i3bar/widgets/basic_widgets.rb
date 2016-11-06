@@ -6,21 +6,22 @@ require 'i3rb/i3bar/widgets/calendar_widget'
 require 'i3rb/i3bar/widgets/wifi_widget'
 require 'i3rb/i3bar/widgets/battery_widget'
 require 'i3rb/i3bar/widgets/temperature_widget'
+require 'i3rb/i3bar/widgets/memory'
 
 
 module I3
   module Bar
     module Widgets
-      BASIC = [ Hostname, WiFi, Battery, Calendar ]
+      ALL = [ Temperature, CMUS, Hostname, WiFi, Battery, Calendar ]
 
       def add_basic_widgets
-	      add_widgets BASIC.map(&:get_instance)
+	      add_widgets ALL.map(&:get_instance)
       end
 
       def add_widget(widget)
         widget = [ widget ] unless widget.kind_of? Array
         widget.each do |w|
-          w = w.get_instance if BASIC.include? w
+          w = w.get_instance if ALL.include? w
           raise ArgumentError.new "#{w.class} is not a #{Widget} subclass" unless w.kind_of? Widget
           @widgets << w
           define_singleton_method w.name do
